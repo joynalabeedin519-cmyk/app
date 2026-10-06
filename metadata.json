@@ -1,0 +1,6 @@
+{
+  "name": "Cyber Sentinel Poster Studio",
+  "description": "Automated graphic layout designer and poster generator for Cyber Sentinel Bangladesh notice posters.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
