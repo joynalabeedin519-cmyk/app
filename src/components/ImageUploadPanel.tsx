@@ -56,26 +56,27 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
       {/* Grid of Two Columns for Left and Right Image */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* =========================================
             LEFT IMAGE (Image 1: Target Profile)
             ========================================= */}
-        <div className="bg-[#0d0421] rounded-2xl p-4 sm:p-5 border border-purple-900/60 shadow-lg space-y-4">
-          <div className="flex items-center justify-between border-b border-purple-900/50 pb-3">
+        <div className="bg-slate-900/85 rounded-2xl p-4 sm:p-5 border border-slate-800/80 shadow-lg shadow-black/20 backdrop-blur-md space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
             <div className="flex items-center gap-2">
               <span className="w-6 h-6 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/40 flex items-center justify-center font-bold text-xs">
                 1
               </span>
-              <h3 className="text-sm font-bold text-white">
+              <h3 className="text-xs sm:text-sm font-bold text-white">
                 বাম পাশের ছবি (টার্গেট প্রোফাইল)
               </h3>
             </div>
             {config.leftImageSrc && (
               <button
+                type="button"
                 onClick={() => onChangeConfig({ leftImageSrc: null })}
-                className="text-xs text-purple-400 hover:text-red-400 transition cursor-pointer p-1"
+                className="text-xs text-slate-400 hover:text-red-400 transition cursor-pointer p-1"
                 title="রিমুভ করুন"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -86,7 +87,7 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
           {/* Upload Dropzone */}
           <div
             onClick={() => leftFileInputRef.current?.click()}
-            className="border-2 border-dashed border-purple-800/80 hover:border-blue-400 rounded-xl p-4 text-center cursor-pointer transition bg-[#060114] hover:bg-[#0f0426] group"
+            className="border-2 border-dashed border-slate-800 hover:border-blue-400 rounded-xl p-4 text-center cursor-pointer transition bg-slate-950/70 hover:bg-slate-900/60 group"
           >
             <input
               ref={leftFileInputRef}
@@ -96,20 +97,21 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
               onChange={(e) => handleFileUpload(e, 'left')}
             />
             <div className="flex flex-col items-center gap-2">
-              <div className="w-9 h-9 rounded-full bg-[#180738] group-hover:bg-blue-600/30 text-purple-300 group-hover:text-cyan-300 flex items-center justify-center transition border border-purple-700/50">
+              <div className="w-9 h-9 rounded-full bg-slate-900 group-hover:bg-blue-600/30 text-blue-400 group-hover:text-cyan-300 flex items-center justify-center transition border border-slate-700/60">
                 <Upload className="w-4 h-4" />
               </div>
               <div>
                 <p className="text-xs font-bold text-slate-200">
                   টার্গেট প্রোফাইলের স্ক্রিনশট আপলোড করুন
                 </p>
-                <p className="text-[11px] text-purple-400/70">PNG, JPG, WebP ফাইল সাপোর্টেড</p>
+                <p className="text-[11px] text-slate-400">PNG, JPG, WebP ফাইল সাপোর্টেড</p>
               </div>
             </div>
           </div>
 
           {/* Quick preset button */}
           <button
+            type="button"
             onClick={() =>
               onChangeConfig({
                 leftImageSrc: generateSampleLeftProfileSvg(),
@@ -118,7 +120,7 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
                 leftImageOffsetY: 0,
               })
             }
-            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-[#080216] hover:bg-[#150630] text-xs text-cyan-300 border border-blue-500/40 hover:border-blue-400 transition cursor-pointer font-semibold"
+            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-950/80 hover:bg-slate-800/80 text-xs text-cyan-300 border border-slate-800 hover:border-blue-500/40 transition cursor-pointer font-semibold active:scale-98"
           >
             <Sparkles className="w-3.5 h-3.5 text-blue-400" />
             <span>ডিফল্ট ফেসবুক স্যাম্পল প্রোফাইল লোড</span>
@@ -126,13 +128,13 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
 
           {/* Position & Zoom Controls */}
           {config.leftImageSrc && (
-            <div className="space-y-3 pt-2 border-t border-purple-900/50 text-xs">
+            <div className="space-y-3 pt-2 border-t border-slate-800/80 text-xs">
               <div>
-                <div className="flex justify-between text-purple-300/80 mb-1">
-                  <span className="flex items-center gap-1">
+                <div className="flex justify-between text-slate-300 mb-1">
+                  <span className="flex items-center gap-1 font-medium">
                     <ZoomIn className="w-3.5 h-3.5 text-blue-400" /> জুম (Zoom)
                   </span>
-                  <span className="font-mono text-cyan-300">
+                  <span className="font-mono text-cyan-300 font-bold">
                     {Math.round((config.leftImageScale || 1) * 100)}%
                   </span>
                 </div>
@@ -150,8 +152,8 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
               </div>
 
               <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <div className="flex justify-between text-purple-300/80 mb-1">
+                <div className="p-2 rounded-lg bg-slate-950/60 border border-slate-800/80">
+                  <div className="flex justify-between text-slate-400 mb-1 text-[11px]">
                     <span>X পজিশন</span>
                     <span className="font-mono text-cyan-300">
                       {Math.round(config.leftImageOffsetX || 0)}
@@ -169,8 +171,8 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
                     className="w-full accent-blue-500 cursor-pointer"
                   />
                 </div>
-                <div>
-                  <div className="flex justify-between text-purple-300/80 mb-1">
+                <div className="p-2 rounded-lg bg-slate-950/60 border border-slate-800/80">
+                  <div className="flex justify-between text-slate-400 mb-1 text-[11px]">
                     <span>Y পজিশন</span>
                     <span className="font-mono text-cyan-300">
                       {Math.round(config.leftImageOffsetY || 0)}
@@ -191,6 +193,7 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
               </div>
 
               <button
+                type="button"
                 onClick={() =>
                   onChangeConfig({
                     leftImageScale: 1,
@@ -198,9 +201,9 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
                     leftImageOffsetY: 0,
                   })
                 }
-                className="flex items-center gap-1 text-[11px] text-purple-400 hover:text-white cursor-pointer pt-1"
+                className="flex items-center gap-1.5 text-[11px] text-slate-400 hover:text-white cursor-pointer pt-1 transition"
               >
-                <RotateCcw className="w-3 h-3" />
+                <RotateCcw className="w-3 h-3 text-cyan-400" />
                 <span>পজিশন রিসেট করুন</span>
               </button>
             </div>
@@ -210,20 +213,21 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
         {/* =========================================
             RIGHT IMAGE (Image 2: Block / Confirmation)
             ========================================= */}
-        <div className="bg-[#0d0421] rounded-2xl p-4 sm:p-5 border border-purple-900/60 shadow-lg space-y-4">
-          <div className="flex items-center justify-between border-b border-purple-900/50 pb-3">
+        <div className="bg-slate-900/85 rounded-2xl p-4 sm:p-5 border border-slate-800/80 shadow-lg shadow-black/20 backdrop-blur-md space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
             <div className="flex items-center gap-2">
-              <span className="w-6 h-6 rounded-lg bg-purple-500/20 text-purple-400 border border-purple-500/40 flex items-center justify-center font-bold text-xs">
+              <span className="w-6 h-6 rounded-lg bg-indigo-500/20 text-indigo-400 border border-indigo-500/40 flex items-center justify-center font-bold text-xs">
                 2
               </span>
-              <h3 className="text-sm font-bold text-white">
+              <h3 className="text-xs sm:text-sm font-bold text-white">
                 ডান পাশের ছবি (ব্লক / কনফার্মেশন)
               </h3>
             </div>
             {config.rightImageSrc && (
               <button
+                type="button"
                 onClick={() => onChangeConfig({ rightImageSrc: null })}
-                className="text-xs text-purple-400 hover:text-red-400 transition cursor-pointer p-1"
+                className="text-xs text-slate-400 hover:text-red-400 transition cursor-pointer p-1"
                 title="রিমুভ করুন"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -234,7 +238,7 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
           {/* Upload Dropzone */}
           <div
             onClick={() => rightFileInputRef.current?.click()}
-            className="border-2 border-dashed border-purple-800/80 hover:border-purple-400 rounded-xl p-4 text-center cursor-pointer transition bg-[#060114] hover:bg-[#0f0426] group"
+            className="border-2 border-dashed border-slate-800 hover:border-indigo-400 rounded-xl p-4 text-center cursor-pointer transition bg-slate-950/70 hover:bg-slate-900/60 group"
           >
             <input
               ref={rightFileInputRef}
@@ -244,20 +248,21 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
               onChange={(e) => handleFileUpload(e, 'right')}
             />
             <div className="flex flex-col items-center gap-2">
-              <div className="w-9 h-9 rounded-full bg-[#180738] group-hover:bg-purple-600/30 text-purple-300 group-hover:text-purple-200 flex items-center justify-center transition border border-purple-700/50">
+              <div className="w-9 h-9 rounded-full bg-slate-900 group-hover:bg-indigo-600/30 text-indigo-400 group-hover:text-indigo-200 flex items-center justify-center transition border border-slate-700/60">
                 <Upload className="w-4 h-4" />
               </div>
               <div>
                 <p className="text-xs font-bold text-slate-200">
                   ব্লক/রিমুভ কনফার্মেশন স্ক্রিনশট আপলোড করুন
                 </p>
-                <p className="text-[11px] text-purple-400/70">"This content isn't available" ইত্যাদি</p>
+                <p className="text-[11px] text-slate-400">"This content isn't available" ইত্যাদি</p>
               </div>
             </div>
           </div>
 
           {/* Quick preset button */}
           <button
+            type="button"
             onClick={() =>
               onChangeConfig({
                 rightImageSrc: generateSampleRightTakedownSvg(),
@@ -266,21 +271,21 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
                 rightImageOffsetY: 0,
               })
             }
-            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-[#080216] hover:bg-[#150630] text-xs text-cyan-300 border border-blue-500/40 hover:border-blue-400 transition cursor-pointer font-semibold"
+            className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-slate-950/80 hover:bg-slate-800/80 text-xs text-cyan-300 border border-slate-800 hover:border-indigo-500/40 transition cursor-pointer font-semibold active:scale-98"
           >
-            <Sparkles className="w-3.5 h-3.5 text-blue-400" />
+            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
             <span>ডিফল্ট "Content not available" স্যাম্পল লোড</span>
           </button>
 
           {/* Position & Zoom Controls */}
           {config.rightImageSrc && (
-            <div className="space-y-3 pt-2 border-t border-purple-900/50 text-xs">
+            <div className="space-y-3 pt-2 border-t border-slate-800/80 text-xs">
               <div>
-                <div className="flex justify-between text-purple-300/80 mb-1">
-                  <span className="flex items-center gap-1">
+                <div className="flex justify-between text-slate-300 mb-1">
+                  <span className="flex items-center gap-1 font-medium">
                     <ZoomIn className="w-3.5 h-3.5 text-blue-400" /> জুম (Zoom)
                   </span>
-                  <span className="font-mono text-cyan-300">
+                  <span className="font-mono text-cyan-300 font-bold">
                     {Math.round((config.rightImageScale || 1) * 100)}%
                   </span>
                 </div>
@@ -298,8 +303,8 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
               </div>
 
               <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <div className="flex justify-between text-purple-300/80 mb-1">
+                <div className="p-2 rounded-lg bg-slate-950/60 border border-slate-800/80">
+                  <div className="flex justify-between text-slate-400 mb-1 text-[11px]">
                     <span>X পজিশন</span>
                     <span className="font-mono text-cyan-300">
                       {Math.round(config.rightImageOffsetX || 0)}
@@ -317,8 +322,8 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
                     className="w-full accent-blue-500 cursor-pointer"
                   />
                 </div>
-                <div>
-                  <div className="flex justify-between text-purple-300/80 mb-1">
+                <div className="p-2 rounded-lg bg-slate-950/60 border border-slate-800/80">
+                  <div className="flex justify-between text-slate-400 mb-1 text-[11px]">
                     <span>Y পজিশন</span>
                     <span className="font-mono text-cyan-300">
                       {Math.round(config.rightImageOffsetY || 0)}
@@ -339,6 +344,7 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
               </div>
 
               <button
+                type="button"
                 onClick={() =>
                   onChangeConfig({
                     rightImageScale: 1,
@@ -346,9 +352,9 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
                     rightImageOffsetY: 0,
                   })
                 }
-                className="flex items-center gap-1 text-[11px] text-purple-400 hover:text-white cursor-pointer pt-1"
+                className="flex items-center gap-1.5 text-[11px] text-slate-400 hover:text-white cursor-pointer pt-1 transition"
               >
-                <RotateCcw className="w-3 h-3" />
+                <RotateCcw className="w-3 h-3 text-cyan-400" />
                 <span>পজিশন রিসেট করুন</span>
               </button>
             </div>
@@ -357,26 +363,30 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
       </div>
 
       {/* Image Corner Rounding & Soft Circle Style */}
-      <div className="bg-[#0d0421] rounded-2xl p-4 sm:p-5 border border-purple-900/60 shadow-lg space-y-4">
-        <div className="flex items-center justify-between border-b border-purple-900/50 pb-3">
+      <div className="bg-slate-900/85 rounded-2xl p-4 sm:p-5 border border-slate-800/80 shadow-lg shadow-black/20 backdrop-blur-md space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
           <div className="flex items-center gap-2">
             <CircleDot className="w-4 h-4 text-cyan-400" />
-            <h3 className="text-sm font-bold text-white">
+            <h3 className="text-xs sm:text-sm font-bold text-white">
               ছবির চারদিকের কর্নার রাউন্ড ও সফট সার্কেল স্টাইল
             </h3>
           </div>
-          <span className="text-xs font-mono font-bold text-cyan-300 bg-blue-950/80 px-2 py-0.5 rounded border border-blue-600/40">
+          <span className="text-xs font-mono font-bold text-cyan-300 bg-blue-500/10 px-2.5 py-0.5 rounded-full border border-blue-500/30">
             {config.imageCornerRadius || 0}px
           </span>
         </div>
 
         <div className="space-y-3">
           <div>
-            <div className="flex justify-between text-xs text-purple-300/80 mb-1.5">
+            <div className="flex justify-between text-xs text-slate-300 mb-1.5">
               <span>কর্নার রাউন্ড মাত্রা (Corner Radius)</span>
               <span className="font-mono text-cyan-300 font-bold">
                 {config.imageCornerRadius || 0}px
-                {(config.imageCornerRadius || 0) >= 50 ? ' (সার্কুলার/পিল)' : (config.imageCornerRadius || 0) > 0 ? ' (সফট রাউন্ড)' : ' (শার্প চারকোনা)'}
+                {(config.imageCornerRadius || 0) >= 50
+                  ? ' (সার্কুলার/পিল)'
+                  : (config.imageCornerRadius || 0) > 0
+                  ? ' (সফট রাউন্ড)'
+                  : ' (শার্প চারকোনা)'}
               </span>
             </div>
             <input
@@ -404,38 +414,38 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
                 key={p.value}
                 type="button"
                 onClick={() => onChangeConfig({ imageCornerRadius: p.value })}
-                className={`py-1.5 px-2.5 rounded-lg border font-semibold transition cursor-pointer text-[11px] ${
+                className={`py-2 px-2.5 rounded-xl border font-semibold transition cursor-pointer text-[11px] active:scale-95 ${
                   (config.imageCornerRadius || 0) === p.value
-                    ? 'bg-blue-600 border-blue-400 text-white shadow-md shadow-blue-950'
-                    : 'bg-[#060114] border-purple-900/60 text-purple-300 hover:text-white hover:bg-[#150630]'
+                    ? 'bg-blue-600 border-blue-400 text-white shadow-md shadow-blue-900/50'
+                    : 'bg-slate-950/70 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/60'
                 }`}
               >
                 {p.label}
               </button>
             ))}
           </div>
-          <p className="text-[11px] text-purple-400/70">
+          <p className="text-[11px] text-slate-400">
             💡 ছবি দুটির চারদিকের কর্নারকে নরম, গোল বা সার্কুলার রূপ দিতে স্লাইডার ব্যবহার করুন।
           </p>
         </div>
       </div>
 
       {/* Frame Styling Settings */}
-      <div className="bg-[#0d0421] rounded-2xl p-4 sm:p-5 border border-purple-900/60 shadow-lg space-y-4">
-        <div className="flex items-center justify-between border-b border-purple-900/50 pb-3">
+      <div className="bg-slate-900/85 rounded-2xl p-4 sm:p-5 border border-slate-800/80 shadow-lg shadow-black/20 backdrop-blur-md space-y-4">
+        <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
           <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-blue-400" />
-            <h3 className="text-sm font-bold text-white">
+            <Layers className="w-4 h-4 text-cyan-400" />
+            <h3 className="text-xs sm:text-sm font-bold text-white">
               ফ্রেম ও লাল বর্ডার স্টাইল (Outer Frame & Divider)
             </h3>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-          <div>
-            <div className="flex justify-between text-purple-300/80 mb-1">
-              <span>লাল বর্ডার এর প্রস্থ (Width)</span>
-              <span className="font-mono text-cyan-300">{config.outerBorderWidth}px</span>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+          <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+            <div className="flex justify-between text-slate-300 mb-1">
+              <span>লাল বর্ডার এর প্রস্থ</span>
+              <span className="font-mono text-cyan-300 font-bold">{config.outerBorderWidth}px</span>
             </div>
             <input
               type="range"
@@ -450,10 +460,10 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
             />
           </div>
 
-          <div>
-            <div className="flex justify-between text-purple-300/80 mb-1">
+          <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+            <div className="flex justify-between text-slate-300 mb-1">
               <span>মাঝের লাল ডিভাইডার লাইন</span>
-              <span className="font-mono text-cyan-300">{config.dividerWidth}px</span>
+              <span className="font-mono text-cyan-300 font-bold">{config.dividerWidth}px</span>
             </div>
             <input
               type="range"
@@ -468,10 +478,10 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
             />
           </div>
 
-          <div>
-            <div className="flex justify-between text-purple-300/80 mb-1">
-              <span>ফ্রেমের রাউন্ড কর্নার (Radius)</span>
-              <span className="font-mono text-cyan-300">{config.frameCornerRadius}px</span>
+          <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
+            <div className="flex justify-between text-slate-300 mb-1">
+              <span>ফ্রেমের রাউন্ড কর্নার</span>
+              <span className="font-mono text-cyan-300 font-bold">{config.frameCornerRadius}px</span>
             </div>
             <input
               type="range"

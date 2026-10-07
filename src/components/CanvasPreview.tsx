@@ -109,42 +109,45 @@ export const CanvasPreview: React.FC<CanvasPreviewProps> = ({
 
   return (
     <div className="w-full flex flex-col items-center">
-      {/* Top Bar above Canvas: Resolution & Zoom controls */}
-      <div className="w-full flex items-center justify-between p-3 bg-[#0d0421] border border-purple-900/70 rounded-t-2xl text-xs text-purple-200">
-        <div className="flex items-center gap-2">
-          <span className="flex items-center gap-1.5 font-mono text-cyan-300 font-bold">
-            <Eye className="w-3.5 h-3.5 text-blue-400" />
-            1:1 লাইভ প্রিভিউ ({config.resolution}x{config.resolution}px)
+      {/* Top Bar above Canvas: Clean & Soft Header with Zoom */}
+      <div className="w-full flex items-center justify-between px-4 py-3 bg-slate-900/90 border border-slate-800/80 rounded-t-2xl text-xs text-slate-300 backdrop-blur-md">
+        <div className="flex items-center gap-2.5">
+          <span className="flex items-center gap-1.5 font-medium text-slate-200">
+            <Eye className="w-4 h-4 text-blue-400" />
+            <span>লাইভ প্রিভিউ</span>
+            <span className="text-[11px] font-mono text-slate-400">
+              ({config.resolution}×{config.resolution}px)
+            </span>
           </span>
           {isRendering && (
-            <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/40 animate-pulse font-mono">
+            <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/30 animate-pulse font-mono">
               আপডেট হচ্ছে...
             </span>
           )}
         </div>
 
         <div className="flex items-center gap-2">
-          <div className="flex items-center bg-[#070214] rounded-lg p-0.5 border border-purple-900/60">
+          <div className="flex items-center bg-slate-950/80 rounded-lg p-0.5 border border-slate-800/80">
             <button
               onClick={() => setZoomLevel((z) => Math.max(0.6, z - 0.15))}
-              className="p-1 hover:text-cyan-300 transition cursor-pointer"
+              className="p-1.5 text-slate-400 hover:text-white transition cursor-pointer"
               title="Zoom out"
             >
               <ZoomOut className="w-3.5 h-3.5" />
             </button>
-            <span className="px-2 font-mono text-[11px] text-purple-300">
+            <span className="px-2 font-mono text-[11px] text-slate-300">
               {Math.round(zoomLevel * 100)}%
             </span>
             <button
               onClick={() => setZoomLevel((z) => Math.min(1.5, z + 0.15))}
-              className="p-1 hover:text-cyan-300 transition cursor-pointer"
+              className="p-1.5 text-slate-400 hover:text-white transition cursor-pointer"
               title="Zoom in"
             >
               <ZoomIn className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => setZoomLevel(1)}
-              className="p-1 hover:text-cyan-300 transition border-l border-purple-900/60 ml-0.5 cursor-pointer"
+              className="p-1.5 text-slate-400 hover:text-white transition border-l border-slate-800/80 ml-0.5 cursor-pointer"
               title="Reset Zoom"
             >
               <Maximize2 className="w-3.5 h-3.5" />
@@ -153,13 +156,13 @@ export const CanvasPreview: React.FC<CanvasPreviewProps> = ({
         </div>
       </div>
 
-      {/* Canvas Viewport */}
+      {/* Canvas Viewport: Soft Ambient Backdrop */}
       <div
         ref={containerRef}
-        className="w-full relative flex items-center justify-center p-2.5 sm:p-5 bg-[#03000a] border-x border-b border-purple-900/70 rounded-b-xl overflow-hidden min-h-[360px] sm:min-h-[460px] max-h-[640px]"
+        className="w-full relative flex items-center justify-center p-3 sm:p-5 bg-[#070b12] border-x border-b border-slate-800/80 rounded-b-2xl overflow-hidden min-h-[360px] sm:min-h-[460px] max-h-[640px] shadow-xl shadow-black/40"
       >
         <div
-          className="relative transition-transform duration-75 shadow-2xl shadow-purple-950/80 rounded-2xl overflow-hidden border-2 border-blue-600/50"
+          className="relative transition-transform duration-75 shadow-2xl shadow-black/90 rounded-2xl overflow-hidden border border-slate-700/50"
           style={{
             transform: `scale(${zoomLevel})`,
             transformOrigin: 'center center',
@@ -186,78 +189,84 @@ export const CanvasPreview: React.FC<CanvasPreviewProps> = ({
         </div>
       </div>
 
-      {/* Primary Action & Download Toolbar Directly Below Preview */}
-      <div className="w-full mt-3 p-3 rounded-xl bg-[#0c041f] border border-purple-900/60 flex flex-col sm:flex-row items-center justify-between gap-2.5">
-        <div className="flex items-center gap-1.5 text-xs text-purple-300/80">
-          <Move className="w-3.5 h-3.5 text-blue-400 shrink-0" />
-          <span>ছবিতে ক্লিক বা টাচ করে পজিশন টেনে ঠিক করুন</span>
+      {/* Primary Action & Download Toolbar: Clean, Fresh, Spacious */}
+      <div className="w-full mt-3.5 p-3.5 sm:p-4 rounded-2xl bg-slate-900/80 border border-slate-800/80 backdrop-blur-md shadow-md space-y-3">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2.5">
+          <div className="flex items-center gap-1.5 text-xs text-slate-400">
+            <Move className="w-3.5 h-3.5 text-blue-400 shrink-0" />
+            <span>ছবিতে ক্লিক বা টাচ করে পজিশন টেনে ঠিক করতে পারবেন</span>
+          </div>
+
+          {/* Quick secondary buttons (Save / Saved List / Copy) */}
+          <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
+            {onOpenSaveModal && (
+              <button
+                type="button"
+                onClick={onOpenSaveModal}
+                title="বর্তমান ডিজাইন নাম দিয়ে সংরক্ষণ করুন"
+                className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 transition-all cursor-pointer active:scale-95"
+              >
+                <Bookmark className="w-3.5 h-3.5" />
+                <span>সংরক্ষণ</span>
+              </button>
+            )}
+
+            {onOpenSavedListModal && (
+              <button
+                type="button"
+                onClick={onOpenSavedListModal}
+                title="সংরক্ষিত ডিজাইনের তালিকা দেখুন"
+                className="flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl bg-slate-800/80 hover:bg-slate-700/80 text-slate-200 border border-slate-700/60 transition-all cursor-pointer active:scale-95"
+              >
+                <FolderOpen className="w-3.5 h-3.5 text-blue-400" />
+                <span>সংরক্ষিত তালিকা</span>
+                {savedCount > 0 && (
+                  <span className="px-1.5 py-0.2 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30 text-[10px] font-mono">
+                    {savedCount}
+                  </span>
+                )}
+              </button>
+            )}
+
+            {onCopyClipboard && (
+              <button
+                onClick={onCopyClipboard}
+                className={`flex items-center justify-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl border transition-all cursor-pointer active:scale-95 ${
+                  copied
+                    ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40'
+                    : 'bg-slate-800/60 hover:bg-slate-700/60 text-slate-300 border-slate-700/60'
+                }`}
+              >
+                {copied ? (
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5 text-slate-400" />
+                )}
+                <span>{copied ? 'কপি হয়েছে!' : 'কপি'}</span>
+              </button>
+            )}
+          </div>
         </div>
 
-        <div className="flex items-center gap-2 w-full sm:w-auto justify-end flex-wrap">
-          {onOpenSaveModal && (
-            <button
-              type="button"
-              onClick={onOpenSaveModal}
-              title="বর্তমান ডিজাইন নাম দিয়ে সংরক্ষণ করুন"
-              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-lg bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-md shadow-emerald-950 transition border border-emerald-400/40 cursor-pointer active:scale-95"
-            >
-              <Bookmark className="w-3.5 h-3.5" />
-              <span>সংরক্ষণ</span>
-            </button>
-          )}
-
-          {onOpenSavedListModal && (
-            <button
-              type="button"
-              onClick={onOpenSavedListModal}
-              title="সংরক্ষিত ডিজাইনের তালিকা দেখুন"
-              className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold rounded-lg bg-[#180738] hover:bg-[#260c54] text-cyan-300 border border-purple-700/60 hover:border-cyan-400 transition cursor-pointer active:scale-95"
-            >
-              <FolderOpen className="w-3.5 h-3.5 text-cyan-400" />
-              <span>সংরক্ষিত তালিকা</span>
-              {savedCount > 0 && (
-                <span className="px-1.5 py-0.2 rounded-full bg-blue-600 text-white text-[10px] font-mono">
-                  {savedCount}
-                </span>
-              )}
-            </button>
-          )}
-
-          {onCopyClipboard && (
-            <button
-              onClick={onCopyClipboard}
-              className={`flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-bold rounded-lg border transition cursor-pointer ${
-                copied
-                  ? 'bg-emerald-950 text-emerald-300 border-emerald-600/60'
-                  : 'bg-[#14082a] hover:bg-[#1f0d40] text-blue-200 border-blue-900/60'
-              }`}
-            >
-              {copied ? (
-                <Check className="w-3.5 h-3.5 text-emerald-400" />
-              ) : (
-                <Copy className="w-3.5 h-3.5 text-blue-400" />
-              )}
-              <span>{copied ? 'কপি হয়েছে!' : 'কপি'}</span>
-            </button>
-          )}
-
+        {/* Primary Download Row: Soft, High-Quality Buttons */}
+        <div className="pt-2 border-t border-slate-800/60 flex items-center gap-2.5">
           <button
             onClick={() => onExport('png', 1080)}
             disabled={isExporting}
-            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-lg bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white shadow-md shadow-purple-950 transition border border-blue-400/40 cursor-pointer disabled:opacity-50 active:scale-95"
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-xs sm:text-sm font-bold rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-md shadow-blue-900/30 transition-all cursor-pointer disabled:opacity-50 active:scale-98"
           >
-            <Download className="w-3.5 h-3.5" />
-            <span>HD ডাউনলোড</span>
+            <Download className="w-4 h-4" />
+            <span>HD ডাউনলোড (1080px)</span>
           </button>
 
           <button
             onClick={() => onExport('png', 2048)}
             disabled={isExporting}
-            title="Download in Ultra 2K Quality (2048x2048px)"
-            className="flex-1 sm:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2 text-xs font-bold rounded-lg bg-gradient-to-r from-[#200847] via-[#2f0d61] to-[#200847] hover:from-[#2c0c5e] hover:to-[#3e1280] text-cyan-300 shadow-md shadow-purple-950/80 transition border border-purple-500/60 hover:border-cyan-400 cursor-pointer disabled:opacity-50 active:scale-95"
+            title="Download in Ultra 2K Quality (2048×2048px)"
+            className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-xs sm:text-sm font-bold rounded-xl bg-indigo-950/70 hover:bg-indigo-900/70 text-indigo-200 border border-indigo-700/50 hover:border-indigo-500 transition-all cursor-pointer disabled:opacity-50 active:scale-98 shadow-sm"
           >
-            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-            <span>2K আল্ট্রা বাটন</span>
+            <Sparkles className="w-4 h-4 text-cyan-400" />
+            <span>2K আল্ট্রা বাটন (2048px)</span>
           </button>
         </div>
       </div>

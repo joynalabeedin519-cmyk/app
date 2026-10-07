@@ -9,6 +9,7 @@ import {
   Pipette,
   Undo2,
   Maximize2,
+  Check,
 } from 'lucide-react';
 
 interface TextControlPanelProps {
@@ -28,6 +29,58 @@ const PALETTE_COLORS = [
   { name: 'সায়ান (Cyan)', hex: '#06b6d4' },
   { name: 'গোলাপি (Pink)', hex: '#ec4899' },
   { name: 'সাদা (White)', hex: '#ffffff' },
+];
+
+const BANGLA_FONTS = [
+  {
+    id: 'Hind Siliguri',
+    name: 'হিন্দ শিলিগুড়ি (Hind Siliguri)',
+    badge: 'ডিফল্ট বোল্ড',
+    sample: 'হ্যারাসমেন্ট রিমুভ',
+    fontFamily: "'Hind Siliguri', sans-serif",
+  },
+  {
+    id: 'Anek Bangla',
+    name: 'অনেক্ বাংলা (Anek Bangla)',
+    badge: 'স্ট্রং ও কমপ্যাক্ট',
+    sample: 'হ্যারাসমেন্ট রিমুভ',
+    fontFamily: "'Anek Bangla', sans-serif",
+  },
+  {
+    id: 'Noto Sans Bengali',
+    name: 'নোটো সান্স (Noto Sans)',
+    badge: 'মডার্ন ও পরিষ্কার',
+    sample: 'হ্যারাসমেন্ট রিমুভ',
+    fontFamily: "'Noto Sans Bengali', sans-serif",
+  },
+  {
+    id: 'Tiro Bangla',
+    name: 'তিরো বাংলা (Tiro Bangla)',
+    badge: 'ফর্মাল ও ঐতিহ্যবাহী',
+    sample: 'হ্যারাসমেন্ট রিমুভ',
+    fontFamily: "'Tiro Bangla', serif",
+  },
+  {
+    id: 'Galada',
+    name: 'গালাদা (Galada)',
+    badge: 'স্টাইলিশ কার্ভি',
+    sample: 'হ্যারাসমেন্ট রিমুভ',
+    fontFamily: "'Galada', cursive",
+  },
+  {
+    id: 'Mina',
+    name: 'মিনা (Mina)',
+    badge: 'স্লিম ও জ্যামিতিক',
+    sample: 'হ্যারাসমেন্ট রিমুভ',
+    fontFamily: "'Mina', sans-serif",
+  },
+  {
+    id: 'Atma',
+    name: 'আত্না (Atma)',
+    badge: 'বোল্ড ও পাঞ্চি',
+    sample: 'হ্যারাসমেন্ট রিমুভ',
+    fontFamily: "'Atma', sans-serif",
+  },
 ];
 
 export const TextControlPanel: React.FC<TextControlPanelProps> = ({
@@ -91,15 +144,15 @@ export const TextControlPanel: React.FC<TextControlPanelProps> = ({
   };
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4 sm:space-y-5">
       {/* 1. Notice Presets with TEAM CSB in Red */}
-      <div className="bg-[#0d0421] rounded-2xl p-3.5 sm:p-5 border border-purple-900/60 shadow-lg shadow-purple-950/40 w-full max-w-full overflow-hidden">
-        <div className="flex items-center justify-between mb-3">
-          <label className="text-sm font-bold text-white flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-blue-400" />
+      <div className="bg-slate-900/85 rounded-2xl p-4 sm:p-5 border border-slate-800/80 shadow-lg shadow-black/20 backdrop-blur-md w-full max-w-full overflow-hidden">
+        <div className="flex items-center justify-between mb-3.5">
+          <label className="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-cyan-400" />
             <span>প্রিসেট নোটিশ টেমপ্লেট (TEAM CSB সহ)</span>
           </label>
-          <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-blue-950/80 text-blue-300 border border-blue-600/50 font-mono font-bold">
+          <span className="text-[11px] px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/30 font-mono font-bold">
             {NOTICE_PRESETS.length}টি প্রিসেট
           </span>
         </div>
@@ -111,11 +164,12 @@ export const TextControlPanel: React.FC<TextControlPanelProps> = ({
             return (
               <button
                 key={preset.id}
+                type="button"
                 onClick={() => onApplyPreset(preset)}
                 className={`text-left p-3 rounded-xl border text-xs transition cursor-pointer flex flex-col justify-between gap-1.5 ${
                   isSelected
-                    ? 'bg-[#1e0a40] border-blue-500 text-white shadow-md shadow-blue-950/80 ring-1 ring-blue-500/60'
-                    : 'bg-[#060114] border-purple-900/50 text-purple-200 hover:border-purple-600 hover:bg-[#140630]'
+                    ? 'bg-blue-950/60 border-blue-500 text-white shadow-md shadow-blue-950/50 ring-1 ring-blue-500/50'
+                    : 'bg-slate-950/70 border-slate-800/80 text-slate-300 hover:border-slate-700 hover:bg-slate-800/50'
                 }`}
               >
                 <div className="flex items-center justify-between gap-1">
@@ -124,7 +178,7 @@ export const TextControlPanel: React.FC<TextControlPanelProps> = ({
                     TEAM CSB
                   </span>
                 </div>
-                <div className="line-clamp-2 text-[11px] text-purple-300/80 font-sans leading-relaxed">
+                <div className="line-clamp-2 text-[11px] text-slate-400 font-sans leading-relaxed">
                   {preset.freeformText.replace(/\[color:[^\]]+\]/g, '').replace(/\[\/color\]/g, '')}
                 </div>
               </button>
@@ -134,23 +188,23 @@ export const TextControlPanel: React.FC<TextControlPanelProps> = ({
       </div>
 
       {/* 2. Text Selection Colorizer Toolbar */}
-      <div className="bg-gradient-to-r from-[#12052e] via-[#0d0421] to-[#080216] rounded-2xl p-3.5 sm:p-5 border border-purple-800/60 shadow-lg space-y-3 w-full max-w-full overflow-hidden">
+      <div className="bg-slate-900/85 rounded-2xl p-4 sm:p-5 border border-slate-800/80 shadow-lg shadow-black/20 backdrop-blur-md space-y-3 w-full max-w-full overflow-hidden">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
           <div className="flex items-center gap-2">
             <Palette className="w-4 h-4 text-blue-400" />
-            <h3 className="text-sm font-bold text-white">
+            <h3 className="text-xs sm:text-sm font-bold text-white">
               সিলেক্ট করে টেক্সট কালার করার টুলবার
             </h3>
           </div>
-          <span className="text-[11px] text-cyan-300 bg-blue-950/70 px-2 py-0.5 rounded border border-blue-500/40">
-            যেকোনো শব্দ সিলেক্ট করে কালার বাটন চাপুন
+          <span className="text-[11px] text-cyan-300 bg-blue-950/70 px-2.5 py-0.5 rounded-full border border-blue-500/40 font-medium">
+            যেকোনো শব্দ সিলেক্ট করে কালার চাপুন
           </span>
         </div>
 
-        <div className="p-3 rounded-xl bg-[#060112] border border-purple-900/60 flex flex-wrap items-center justify-between gap-3">
+        <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800/80 flex flex-wrap items-center justify-between gap-3">
           {/* Swatches */}
           <div className="flex items-center flex-wrap gap-2">
-            <span className="text-xs font-semibold text-purple-200 mr-1 flex items-center gap-1">
+            <span className="text-xs font-semibold text-slate-300 mr-1 flex items-center gap-1">
               <Pipette className="w-3.5 h-3.5 text-blue-400" />
               প্যালেট:
             </span>
@@ -161,24 +215,24 @@ export const TextControlPanel: React.FC<TextControlPanelProps> = ({
                 type="button"
                 onClick={() => handleApplyColorToSelection(c.hex)}
                 title={`সিলেক্টেড টেক্সটে ${c.name} কালার দিন`}
-                className="w-7 h-7 rounded-lg border border-purple-900 hover:scale-110 active:scale-95 transition cursor-pointer shadow-sm flex items-center justify-center"
+                className="w-7 h-7 rounded-lg border border-slate-700/80 hover:scale-110 active:scale-95 transition cursor-pointer shadow-sm flex items-center justify-center hover:border-white"
                 style={{ backgroundColor: c.hex }}
               />
             ))}
 
             {/* Custom Color input */}
-            <div className="flex items-center gap-1.5 pl-1 border-l border-purple-900/70">
+            <div className="flex items-center gap-1.5 pl-1 border-l border-slate-800">
               <input
                 type="color"
                 value={customColor}
                 onChange={(e) => setCustomColor(e.target.value)}
-                className="w-7 h-7 rounded-lg border border-purple-800 bg-transparent cursor-pointer"
+                className="w-7 h-7 rounded-lg border border-slate-700 bg-transparent cursor-pointer"
                 title="কাস্টম কালার বেছে নিন"
               />
               <button
                 type="button"
                 onClick={() => handleApplyColorToSelection(customColor)}
-                className="px-2.5 py-1 rounded-md bg-[#19083b] hover:bg-[#250d54] text-blue-200 text-xs font-semibold cursor-pointer border border-blue-700/50"
+                className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold cursor-pointer shadow-sm active:scale-95 transition"
               >
                 প্রয়োগ
               </button>
@@ -189,27 +243,28 @@ export const TextControlPanel: React.FC<TextControlPanelProps> = ({
           <button
             type="button"
             onClick={handleClearColorFromSelection}
-            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-[#14062f] hover:bg-[#1d0944] text-purple-200 hover:text-white text-xs border border-purple-800/60 transition cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800/80 hover:bg-slate-700/80 text-slate-300 hover:text-white text-xs border border-slate-700/60 transition cursor-pointer active:scale-95"
             title="সিলেক্টেড অংশের কালার রিমুভ করে স্বাভাবিক করুন"
           >
-            <Undo2 className="w-3.5 h-3.5" />
+            <Undo2 className="w-3.5 h-3.5 text-slate-400" />
             <span>কালার মুছুন</span>
           </button>
         </div>
 
-        <p className="text-[11px] text-purple-300/70">
-          💡 নিচের টেক্সটবক্সে মাউস দিয়ে কোনো লেখা হাইলাইট (সিলেক্ট) করুন, তারপর ওপরের কালার বাটনে চাপ দিন।
+        <p className="text-[11px] text-slate-400 flex items-center gap-1.5">
+          <span>💡</span>
+          <span>নিচের টেক্সটবক্সে মাউস বা আঙুল দিয়ে কোনো লেখা হাইলাইট (সিলেক্ট) করুন, তারপর ওপরের কালার বাটনে চাপ দিন।</span>
         </p>
       </div>
 
       {/* 3. Permanent Freeform Banner Text Editor */}
-      <div className="bg-[#0d0421] rounded-2xl p-3.5 sm:p-5 border border-purple-900/60 shadow-lg space-y-4 w-full max-w-full overflow-hidden">
-        <div className="flex items-center justify-between border-b border-purple-900/50 pb-3">
+      <div className="bg-slate-900/85 rounded-2xl p-4 sm:p-5 border border-slate-800/80 shadow-lg shadow-black/20 backdrop-blur-md space-y-4 w-full max-w-full overflow-hidden">
+        <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
           <div className="flex items-center gap-2">
-            <Type className="w-4 h-4 text-blue-400" />
-            <h3 className="text-sm font-bold text-white">ব্যানার টেক্সট এডিটর</h3>
+            <Type className="w-4 h-4 text-cyan-400" />
+            <h3 className="text-xs sm:text-sm font-bold text-white">ব্যানার টেক্সট এডিটর</h3>
           </div>
-          <span className="text-xs text-blue-300 font-mono font-bold bg-blue-950/60 px-2 py-0.5 rounded border border-blue-600/40">
+          <span className="text-xs text-blue-300 font-mono font-bold bg-blue-500/10 px-2 py-0.5 rounded-full border border-blue-500/30">
             ফ্রিফর্ম মোড সক্রিয়
           </span>
         </div>
@@ -222,76 +277,26 @@ export const TextControlPanel: React.FC<TextControlPanelProps> = ({
             value={config.freeformText}
             onChange={(e) => onChangeConfig({ freeformText: e.target.value })}
             placeholder="প্রতিনিয়ত হ্যারাসমেন্ট করার অপরাধে&#10;একটি আইডি রিমুভ করা হলো [color:#dc2626]TEAM CSB[/color]&#10;পক্ষ থেকে।"
-            className="w-full px-4 py-3 rounded-xl bg-[#060112] border border-purple-900/70 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm text-white placeholder-purple-400/40 outline-none transition font-sans leading-relaxed"
+            className="w-full px-4 py-3 rounded-xl bg-slate-950/80 border border-slate-800 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 text-sm text-slate-100 placeholder-slate-500 outline-none transition font-sans leading-relaxed shadow-inner"
           />
 
-          {/* New Font Styles Option (ফন্ট স্টাইল নির্বাচন) */}
-          <div className="p-4 rounded-xl bg-[#070116] border border-purple-900/60 space-y-3">
-            <div className="flex items-center justify-between border-b border-purple-900/40 pb-2.5">
+          {/* Font Styles Option (ফন্ট স্টাইল নির্বাচন) */}
+          <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800/80 space-y-3">
+            <div className="flex items-center justify-between border-b border-slate-800/70 pb-2.5">
               <div className="flex items-center gap-2">
                 <Type className="w-4 h-4 text-cyan-400" />
                 <span className="text-xs font-bold text-white">
                   ফন্ট স্টাইল নির্বাচন (Font Styles)
                 </span>
               </div>
-              <span className="text-[10px] text-blue-300 font-mono px-2 py-0.5 rounded bg-blue-950/80 border border-blue-600/40 font-semibold">
+              <span className="text-[10px] text-blue-300 font-mono px-2 py-0.5 rounded bg-blue-500/15 border border-blue-500/30 font-semibold">
                 {config.bannerFontFamily || 'Hind Siliguri'}
               </span>
             </div>
 
             {/* Font Options Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-[240px] overflow-y-auto pr-1">
-              {[
-                {
-                  id: 'Hind Siliguri',
-                  name: 'হিন্দ শিলিগুড়ি (Hind Siliguri)',
-                  badge: 'ডিফল্ট বোল্ড',
-                  sample: 'হ্যারাসমেন্ট রিমুভ',
-                  fontFamily: "'Hind Siliguri', sans-serif",
-                },
-                {
-                  id: 'Anek Bangla',
-                  name: 'অনেক্ বাংলা (Anek Bangla)',
-                  badge: 'স্ট্রং ও কমপ্যাক্ট',
-                  sample: 'হ্যারাসমেন্ট রিমুভ',
-                  fontFamily: "'Anek Bangla', sans-serif",
-                },
-                {
-                  id: 'Noto Sans Bengali',
-                  name: 'নোটো সান্স (Noto Sans)',
-                  badge: 'মডার্ন ও পরিষ্কার',
-                  sample: 'হ্যারাসমেন্ট রিমুভ',
-                  fontFamily: "'Noto Sans Bengali', sans-serif",
-                },
-                {
-                  id: 'Tiro Bangla',
-                  name: 'তিরো বাংলা (Tiro Bangla)',
-                  badge: 'ফর্মাল ও ঐতিহ্যবাহী',
-                  sample: 'হ্যারাসমেন্ট রিমুভ',
-                  fontFamily: "'Tiro Bangla', serif",
-                },
-                {
-                  id: 'Galada',
-                  name: 'গালাদা (Galada)',
-                  badge: 'স্টাইলিশ কার্ভি',
-                  sample: 'হ্যারাসমেন্ট রিমুভ',
-                  fontFamily: "'Galada', cursive",
-                },
-                {
-                  id: 'Mina',
-                  name: 'মিনা (Mina)',
-                  badge: 'স্লিম ও জ্যামিতিক',
-                  sample: 'হ্যারাসমেন্ট রিমুভ',
-                  fontFamily: "'Mina', sans-serif",
-                },
-                {
-                  id: 'Atma',
-                  name: 'আত্না (Atma)',
-                  badge: 'বোল্ড ও পাঞ্চি',
-                  sample: 'হ্যারাসমেন্ট রিমুভ',
-                  fontFamily: "'Atma', sans-serif",
-                },
-              ].map((f) => {
+              {BANGLA_FONTS.map((f) => {
                 const isSelected = (config.bannerFontFamily || 'Hind Siliguri') === f.id;
 
                 return (
@@ -301,21 +306,22 @@ export const TextControlPanel: React.FC<TextControlPanelProps> = ({
                     onClick={() => onChangeConfig({ bannerFontFamily: f.id })}
                     className={`p-2.5 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between gap-1 ${
                       isSelected
-                        ? 'bg-[#1e0a40] border-blue-500 text-white shadow-md shadow-blue-950/80 ring-1 ring-blue-500/60'
-                        : 'bg-[#0a031c] border-purple-900/50 text-purple-200 hover:border-purple-600 hover:bg-[#140630]'
+                        ? 'bg-blue-950/60 border-blue-500 text-white shadow-md shadow-blue-950/60 ring-1 ring-blue-500/60'
+                        : 'bg-slate-900/70 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-slate-850'
                     }`}
                   >
                     <div className="flex items-center justify-between gap-1">
                       <span className="text-xs font-semibold text-slate-200">{f.name}</span>
-                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-purple-950 text-purple-300 font-mono border border-purple-800 shrink-0">
+                      <span className="text-[9px] px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 font-mono border border-slate-700 shrink-0">
                         {f.badge}
                       </span>
                     </div>
                     <div
-                      className="text-sm font-bold text-cyan-300 pt-0.5 tracking-wide"
+                      className="text-sm font-bold text-cyan-300 pt-0.5 tracking-wide flex items-center justify-between"
                       style={{ fontFamily: f.fontFamily }}
                     >
-                      {f.sample} TEAM CSB
+                      <span>{f.sample} TEAM CSB</span>
+                      {isSelected && <Check className="w-3.5 h-3.5 text-blue-400" />}
                     </div>
                   </button>
                 );
@@ -323,9 +329,9 @@ export const TextControlPanel: React.FC<TextControlPanelProps> = ({
             </div>
 
             {/* Font Weight Selector */}
-            <div className="pt-2 border-t border-purple-900/40 flex items-center justify-between text-xs">
-              <span className="text-purple-300/80 font-medium">ফন্টের পুরুত্ব (Font Weight):</span>
-              <div className="flex items-center gap-1 bg-[#05010e] p-0.5 rounded-lg border border-purple-900/60">
+            <div className="pt-2 border-t border-slate-800/70 flex items-center justify-between text-xs">
+              <span className="text-slate-400 font-medium">ফন্টের পুরুত্ব (Font Weight):</span>
+              <div className="flex items-center gap-1 bg-slate-900/90 p-0.5 rounded-lg border border-slate-800">
                 {[
                   { label: 'বোল্ড (700)', value: '700' },
                   { label: 'এক্সট্রা বোল্ড (800)', value: '800' },
@@ -335,10 +341,10 @@ export const TextControlPanel: React.FC<TextControlPanelProps> = ({
                     key={w.value}
                     type="button"
                     onClick={() => onChangeConfig({ bannerFontWeight: w.value })}
-                    className={`px-2 py-1 rounded text-[11px] font-bold transition cursor-pointer ${
+                    className={`px-2 py-1 rounded-md text-[11px] font-bold transition cursor-pointer ${
                       (config.bannerFontWeight || '800') === w.value
                         ? 'bg-blue-600 text-white shadow-sm'
-                        : 'text-purple-300 hover:text-white'
+                        : 'text-slate-400 hover:text-white'
                     }`}
                   >
                     {w.label}
@@ -350,20 +356,20 @@ export const TextControlPanel: React.FC<TextControlPanelProps> = ({
         </div>
 
         {/* 4. Separate Banner Size vs Text Size Controls */}
-        <div className="pt-4 border-t border-purple-900/50 space-y-4">
+        <div className="pt-4 border-t border-slate-800/80 space-y-4">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-white flex items-center gap-2">
-              <Sliders className="w-3.5 h-3.5 text-blue-400" />
+              <Sliders className="w-3.5 h-3.5 text-cyan-400" />
               <span>ব্যানারের সাইজ ও লেখার সাইজ পৃথক নিয়ন্ত্রণ</span>
             </span>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl bg-[#060114] border border-purple-900/60">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-xl bg-slate-950/70 border border-slate-800/80">
             {/* Control 1: Banner Height / Size */}
             <div className="space-y-1.5">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-bold text-purple-300 flex items-center gap-1.5">
-                  <Maximize2 className="w-3.5 h-3.5 text-purple-400" />
+                <span className="font-bold text-slate-200 flex items-center gap-1.5">
+                  <Maximize2 className="w-3.5 h-3.5 text-blue-400" />
                   <span>১. ব্যানারের সাইজ / উচ্চতা (Banner Size)</span>
                 </span>
                 <span className="font-mono text-cyan-300 font-bold">
@@ -381,7 +387,7 @@ export const TextControlPanel: React.FC<TextControlPanelProps> = ({
                 }
                 className="w-full accent-blue-500 cursor-pointer"
               />
-              <p className="text-[10px] text-purple-400/60">
+              <p className="text-[10px] text-slate-400">
                 ব্যানারটির উচ্চতা বড় বা ছোট করে স্পেস নিয়ন্ত্রণ করুন।
               </p>
             </div>
@@ -389,8 +395,8 @@ export const TextControlPanel: React.FC<TextControlPanelProps> = ({
             {/* Control 2: Text Font Size */}
             <div className="space-y-1.5">
               <div className="flex justify-between items-center text-xs">
-                <span className="font-bold text-blue-300 flex items-center gap-1.5">
-                  <Type className="w-3.5 h-3.5 text-blue-400" />
+                <span className="font-bold text-slate-200 flex items-center gap-1.5">
+                  <Type className="w-3.5 h-3.5 text-cyan-400" />
                   <span>২. লেখার ফন্ট সাইজ (Text Font Size)</span>
                 </span>
                 <span className="font-mono text-cyan-300 font-bold">
@@ -408,7 +414,7 @@ export const TextControlPanel: React.FC<TextControlPanelProps> = ({
                 }
                 className="w-full accent-blue-500 cursor-pointer"
               />
-              <p className="text-[10px] text-purple-400/60">
+              <p className="text-[10px] text-slate-400">
                 ব্যানারের ভেতরের লেখার অক্ষর বড় বা ছোট করুন।
               </p>
             </div>
@@ -416,10 +422,10 @@ export const TextControlPanel: React.FC<TextControlPanelProps> = ({
 
           {/* Border, Radius & Color controls */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1">
-            <div>
-              <div className="flex justify-between text-purple-300/80 mb-1">
+            <div className="p-3 rounded-xl bg-slate-950/50 border border-slate-800/80">
+              <div className="flex justify-between text-slate-300 mb-1">
                 <span>ব্যানার কর্নার রাউন্ড</span>
-                <span className="font-mono text-cyan-300">
+                <span className="font-mono text-cyan-300 font-bold">
                   {config.bannerCornerRadius}px
                 </span>
               </div>
@@ -436,10 +442,10 @@ export const TextControlPanel: React.FC<TextControlPanelProps> = ({
               />
             </div>
 
-            <div>
-              <div className="flex justify-between text-purple-300/80 mb-1">
+            <div className="p-3 rounded-xl bg-slate-950/50 border border-slate-800/80">
+              <div className="flex justify-between text-slate-300 mb-1">
                 <span>লাল বর্ডার এর প্রস্থ</span>
-                <span className="font-mono text-cyan-300">
+                <span className="font-mono text-cyan-300 font-bold">
                   {config.bannerBorderWidth}px
                 </span>
               </div>
@@ -456,7 +462,7 @@ export const TextControlPanel: React.FC<TextControlPanelProps> = ({
               />
             </div>
 
-            <div className="flex items-center justify-between pt-3">
+            <div className="p-3 rounded-xl bg-slate-950/50 border border-slate-800/80 flex items-center justify-around">
               <div className="flex items-center gap-2">
                 <input
                   type="color"
@@ -464,9 +470,9 @@ export const TextControlPanel: React.FC<TextControlPanelProps> = ({
                   onChange={(e) =>
                     onChangeConfig({ bannerBorderColor: e.target.value })
                   }
-                  className="w-6 h-6 rounded border border-purple-800 bg-transparent cursor-pointer"
+                  className="w-6 h-6 rounded border border-slate-700 bg-transparent cursor-pointer"
                 />
-                <span className="text-[11px] text-purple-200">বর্ডার কালার</span>
+                <span className="text-[11px] text-slate-300">বর্ডার</span>
               </div>
 
               <div className="flex items-center gap-2">
@@ -476,9 +482,9 @@ export const TextControlPanel: React.FC<TextControlPanelProps> = ({
                   onChange={(e) =>
                     onChangeConfig({ bannerBgColor: e.target.value })
                   }
-                  className="w-6 h-6 rounded border border-purple-800 bg-transparent cursor-pointer"
+                  className="w-6 h-6 rounded border border-slate-700 bg-transparent cursor-pointer"
                 />
-                <span className="text-[11px] text-purple-200">ব্যাকগ্রাউন্ড</span>
+                <span className="text-[11px] text-slate-300">ব্যাকগ্রাউন্ড</span>
               </div>
             </div>
           </div>

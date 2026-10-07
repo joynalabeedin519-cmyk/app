@@ -90,7 +90,18 @@ const DEFAULT_CONFIG: PosterConfig = {
 };
 
 export default function App() {
-  const [config, setConfig] = useState<PosterConfig>(DEFAULT_CONFIG);
+  const [config, setConfig] = useState<PosterConfig>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return { ...DEFAULT_CONFIG, ...parsed };
+      }
+    } catch (e) {
+      console.warn('Could not load cached config:', e);
+    }
+    return DEFAULT_CONFIG;
+  });
   const [activeTab, setActiveTab] = useState<'text' | 'images' | 'watermark'>('text');
   const [mobileView, setMobileView] = useState<'preview' | 'editor'>('editor');
   const [isExporting, setIsExporting] = useState<boolean>(false);
@@ -113,6 +124,30 @@ export default function App() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const previewSectionRef = useRef<HTMLDivElement>(null);
   const editorSectionRef = useRef<HTMLDivElement>(null);
+
+  // Auto-save current configuration to localStorage so users can resume anytime
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+      } catch (e) {
+        // Fallback for quota limit if heavy image base64 strings are present
+        try {
+          const minimal = {
+            ...config,
+            leftImageSrc: config.leftImageSrc?.startsWith('data:') ? null : config.leftImageSrc,
+            rightImageSrc: config.rightImageSrc?.startsWith('data:') ? null : config.rightImageSrc,
+            processedCustomEmblemSrc: null,
+          };
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(minimal));
+        } catch (err) {
+          console.warn('LocalStorage save skipped:', err);
+        }
+      }
+    }, 500);
+
+    return () => clearTimeout(handler);
+  }, [config]);
 
   // Pre-process emblem immediately on mount so watermark never displays white square corners
   useEffect(() => {
@@ -340,10 +375,13 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#05010e] bg-gradient-to-b from-[#0a0319] via-[#05010e] to-[#04010a] text-slate-100 flex flex-col font-sans selection:bg-purple-600 selection:text-white">
+    <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col font-sans selection:bg-blue-600 selection:text-white relative overflow-x-hidden">
+      {/* Soft Ambient Background Glow */}
+      <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_80%_60%_at_50%_-15%,rgba(59,130,246,0.12),rgba(0,0,0,0))]" />
+
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-xl bg-[#13072b]/95 border border-purple-500/50 shadow-2xl shadow-purple-950 text-xs sm:text-sm text-white flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-3 duration-200 backdrop-blur-md">
+        <div className="fixed bottom-6 right-6 z-50 px-4 py-3 rounded-2xl bg-slate-900/95 border border-blue-500/40 shadow-2xl shadow-black/80 text-xs sm:text-sm text-white flex items-center gap-2.5 animate-in fade-in slide-in-from-bottom-3 duration-200 backdrop-blur-xl">
           <Sparkles className="w-4 h-4 text-cyan-400 shrink-0" />
           <span>{toastMessage}</span>
         </div>
@@ -353,8 +391,8 @@ export default function App() {
       <Header />
 
       {/* Mobile-Only Switcher Bar (Resolves Mobile Scrolling & Quick Actions) */}
-      <div className="lg:hidden sticky top-[57px] z-30 bg-[#0c041d]/95 border-b border-purple-900/60 p-2 backdrop-blur-md">
-        <div className="max-w-md mx-auto grid grid-cols-2 gap-2 bg-[#05010e] p-1 rounded-xl border border-purple-900/40">
+      <div className="lg:hidden sticky top-[57px] z-30 bg-[#0c111d]/90 border-b border-slate-800/80 p-2 backdrop-blur-xl">
+        <div className="max-w-md mx-auto grid grid-cols-2 gap-2 bg-slate-950/80 p-1 rounded-xl border border-slate-800/80">
           <button
             onClick={() => {
               setMobileView('editor');
@@ -362,8 +400,8 @@ export default function App() {
             }}
             className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition cursor-pointer ${
               mobileView === 'editor'
-                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md'
-                : 'text-purple-300 hover:text-white'
+                ? 'bg-blue-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-white'
             }`}
           >
             <Sliders className="w-3.5 h-3.5 shrink-0" />
@@ -377,8 +415,8 @@ export default function App() {
             }}
             className={`flex items-center justify-center gap-1.5 py-2 px-3 rounded-lg text-xs font-bold transition cursor-pointer ${
               mobileView === 'preview'
-                ? 'bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-md'
-                : 'text-purple-300 hover:text-white'
+                ? 'bg-indigo-600 text-white shadow-sm'
+                : 'text-slate-400 hover:text-white'
             }`}
           >
             <Eye className="w-3.5 h-3.5 shrink-0" />
@@ -388,8 +426,8 @@ export default function App() {
       </div>
 
       {/* Main Workspace Layout */}
-      <main className="flex-1 max-w-7xl w-full mx-auto p-2.5 sm:p-6 lg:p-8 overflow-x-hidden">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 lg:gap-8 items-start w-full max-w-full">
+      <main className="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 lg:p-8 overflow-x-hidden relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-8 items-start w-full max-w-full">
           {/* =======================================================
               Left / Preview Column:
               CRITICAL FIX: Uses lg:sticky lg:top-20 ONLY on large screens!
@@ -416,14 +454,14 @@ export default function App() {
             />
 
             {/* Quick Reference Summary */}
-            <div className="w-full mt-3 p-3.5 rounded-xl bg-[#0e0524]/80 border border-purple-900/50 text-xs text-purple-200/80 flex items-start gap-2.5 shadow-sm">
-              <Info className="w-4 h-4 text-cyan-400 shrink-0 mt-0.5" />
+            <div className="w-full mt-3.5 p-4 rounded-2xl bg-slate-900/60 border border-slate-800/70 text-xs text-slate-300 flex items-start gap-3 shadow-sm backdrop-blur-sm">
+              <Info className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
               <div>
                 <p className="text-white font-semibold mb-0.5">
                   CYBER SENTINEL BANGLADESH পোস্টার স্টুডিও
                 </p>
-                <p className="text-purple-300/80 leading-relaxed">
-                  মোবাইলে ছবি বা টেক্সট এডিট করতে উপরের <strong>"এডিটর ও টেক্সট"</strong> বাটনে ট্যাপ করুন। এডিট করার সাথে সাথে লাইভ প্রিভিউ স্বয়ংক্রিয়ভাবে আপডেট হবে।
+                <p className="text-slate-400 leading-relaxed">
+                  মোবাইলে ছবি বা টেক্সট এডিট করতে উপরের <strong>"এডিটর"</strong> বাটনে ট্যাপ করুন। এডিট করার সাথে সাথে লাইভ প্রিভিউ স্বয়ংক্রিয়ভাবে আপডেট হবে।
                 </p>
               </div>
             </div>
@@ -436,47 +474,47 @@ export default function App() {
              ======================================================= */}
           <div
             ref={editorSectionRef}
-            className={`lg:col-span-6 xl:col-span-6 space-y-4 sm:space-y-5 transition-all w-full max-w-full ${
+            className={`lg:col-span-6 xl:col-span-6 space-y-5 transition-all w-full max-w-full ${
               mobileView === 'preview' ? 'hidden lg:block' : 'block'
             }`}
           >
-            {/* Tabs Header: Guaranteed to fit in 1 line on any mobile */}
-            <div className="grid grid-cols-3 gap-1 p-1 rounded-xl bg-[#0c041f] border border-purple-900/60 shadow-lg w-full max-w-full">
+            {/* Tabs Header: Clean Segmented Control */}
+            <div className="grid grid-cols-3 gap-1.5 p-1.5 rounded-2xl bg-slate-900/90 border border-slate-800/80 shadow-md backdrop-blur-md w-full max-w-full">
               <button
                 onClick={() => setActiveTab('text')}
-                className={`flex items-center justify-center gap-1 sm:gap-1.5 py-2 px-1 sm:px-2.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition cursor-pointer min-w-0 ${
+                className={`flex items-center justify-center gap-1.5 py-2.5 px-1 sm:px-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer min-w-0 ${
                   activeTab === 'text'
-                    ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-md shadow-purple-950'
-                    : 'text-purple-300/70 hover:text-white hover:bg-[#150733]'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-900/30'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
                 }`}
               >
-                <Type className="w-3.5 h-3.5 text-cyan-300 shrink-0" />
+                <Type className="w-4 h-4 text-cyan-300 shrink-0" />
                 <span className="truncate hidden sm:inline">১. ব্যানার টেক্সট</span>
                 <span className="truncate sm:hidden">১. টেক্সট</span>
               </button>
 
               <button
                 onClick={() => setActiveTab('images')}
-                className={`flex items-center justify-center gap-1 sm:gap-1.5 py-2 px-1 sm:px-2.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition cursor-pointer min-w-0 ${
+                className={`flex items-center justify-center gap-1.5 py-2.5 px-1 sm:px-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer min-w-0 ${
                   activeTab === 'images'
-                    ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-md shadow-purple-950'
-                    : 'text-purple-300/70 hover:text-white hover:bg-[#150733]'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-900/30'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
                 }`}
               >
-                <ImageIcon className="w-3.5 h-3.5 text-cyan-300 shrink-0" />
+                <ImageIcon className="w-4 h-4 text-cyan-300 shrink-0" />
                 <span className="truncate hidden sm:inline">২. ছবি আপলোড</span>
                 <span className="truncate sm:hidden">২. ছবি</span>
               </button>
 
               <button
                 onClick={() => setActiveTab('watermark')}
-                className={`flex items-center justify-center gap-1 sm:gap-1.5 py-2 px-1 sm:px-2.5 rounded-lg text-[11px] sm:text-xs md:text-sm font-bold transition cursor-pointer min-w-0 ${
+                className={`flex items-center justify-center gap-1.5 py-2.5 px-1 sm:px-2.5 rounded-xl text-xs sm:text-sm font-bold transition-all cursor-pointer min-w-0 ${
                   activeTab === 'watermark'
-                    ? 'bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white shadow-md shadow-purple-950'
-                    : 'text-purple-300/70 hover:text-white hover:bg-[#150733]'
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-900/30'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-800/60'
                 }`}
               >
-                <Shield className="w-3.5 h-3.5 text-cyan-300 shrink-0" />
+                <Shield className="w-4 h-4 text-cyan-300 shrink-0" />
                 <span className="truncate hidden sm:inline">৩. ওয়াটারমার্ক</span>
                 <span className="truncate sm:hidden">৩. লোগো</span>
               </button>
@@ -514,7 +552,7 @@ export default function App() {
                   setMobileView('preview');
                   scrollToPreview();
                 }}
-                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-purple-700 via-indigo-600 to-blue-600 text-white font-bold text-sm shadow-xl shadow-purple-950/80 border border-purple-500/40 cursor-pointer active:scale-98 transition"
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm shadow-xl shadow-blue-950/60 border border-blue-400/30 cursor-pointer active:scale-98 transition"
               >
                 <Eye className="w-4 h-4 text-cyan-300" />
                 <span>লাইভ পোস্টার প্রিভিউ দেখুন ↗</span>
@@ -525,27 +563,27 @@ export default function App() {
       </main>
 
       {/* Footer Watermark Credit linking to Telegram Bot */}
-      <footer className="w-full py-6 mt-6 border-t border-purple-900/40 bg-[#04010a]/90 flex flex-col items-center justify-center text-center">
+      <footer className="w-full py-7 mt-8 border-t border-slate-800/80 bg-[#070b12]/90 flex flex-col items-center justify-center text-center relative z-10">
         <a
           href="https://t.me/Rye_Flux_bot"
           target="_blank"
           rel="noopener noreferrer"
-          className="group inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0d0421] hover:bg-[#1a083b] border border-purple-700/60 hover:border-cyan-400 shadow-lg shadow-purple-950/70 hover:shadow-cyan-950/50 transition-all duration-200 cursor-pointer active:scale-95"
+          className="group inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-slate-900/90 hover:bg-slate-800/90 border border-slate-700/70 hover:border-blue-400/60 shadow-lg shadow-black/50 transition-all duration-200 cursor-pointer active:scale-95"
           title="ক্লিক করে টেলিগ্রাম বট খুলুন (@Rye_Flux_bot)"
         >
           {/* Telegram Icon */}
           <svg
-            className="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform shrink-0"
+            className="w-4 h-4 text-blue-400 group-hover:scale-110 transition-transform shrink-0"
             viewBox="0 0 24 24"
             fill="currentColor"
           >
             <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.07-.19-.08-.05-.19-.02-.27 0-.12.03-1.99 1.27-5.62 3.72-.53.36-1.01.54-1.44.53-.47-.01-1.38-.27-2.05-.49-.83-.27-1.49-.42-1.43-.88.03-.24.37-.49 1.02-.75 3.98-1.73 6.64-2.87 7.97-3.44 3.8-1.58 4.59-1.86 5.11-1.87.11 0 .37.03.54.17.14.12.18.28.2.45-.02.07-.02.16-.03.22z" />
           </svg>
-          <span className="text-xs font-mono font-bold tracking-wide bg-gradient-to-r from-cyan-400 via-purple-300 to-pink-400 bg-clip-text text-transparent group-hover:from-white group-hover:to-cyan-300 transition-colors">
+          <span className="text-xs font-mono font-bold tracking-wide text-slate-200 group-hover:text-white transition-colors">
             Made by Rye Flux (@Rye_Flux_bot)
           </span>
         </a>
-        <p className="text-[10px] text-purple-400/50 mt-2 font-mono tracking-wider select-none">
+        <p className="text-[10px] text-slate-500 mt-2 font-mono tracking-wider select-none">
           CYBER SENTINEL BANGLADESH • OFFICIAL NOTICE STUDIO
         </p>
       </footer>
