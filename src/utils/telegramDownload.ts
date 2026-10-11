@@ -1,16 +1,22 @@
 /**
- * Telegram WebApp & Mobile-safe file download / share utility
+ * Modern Universal Downloader & Saver:
  * 
- * In Telegram Mini Apps (iOS, Android, Desktop WebView), typical <a download>
- * links fail because the iframe sandbox blocks download attribute triggering.
+ * 1. Desktop / PC:
+ *    - Uses Native File System Access API (`window.showSaveFilePicker`) if supported
+ *      (Chrome, Edge, Opera on Desktop). This displays the OS native "Save As" file menu dialog,
+ *      letting the user choose exactly which folder / path to save the image to!
+ *    - Fallback on Firefox/Safari Desktop: Creates a direct blob download link with file name prompt.
+ *
+ * 2. Mobile (Android / iOS / Google Photos):
+ *    - Checks if running on mobile device (touch, screen width, user agent).
+ *    - Uses Web Share API (`navigator.share` with file). On Android, this directly opens the
+ *      system sheet showing "Save to Google Photos", "Save to device", "Gallery", "Files", Telegram, etc.
+ *    - On Android Chrome, if direct download is triggered, also triggers automatic download to device Downloads/Pictures folder.
+ *    - Also provides fallback modal preview so users can Tap & Hold to save directly into Photos.
  * 
- * Solutions implemented here:
- * 1. Web Share API (navigator.share with File): Supported in Telegram mobile webview and mobile browsers.
- *    Directly opens native OS share sheet (Save Image to Gallery / Files / Share to Chat).
- * 2. Telegram WebApp API: Checks window.Telegram?.WebApp.downloadFile if Bot API 8+ is available.
- * 3. Fallback: Creates blob and object URL with download anchor.
- * 4. In Telegram fallback modal: Display a popup previewing the full image so users can
- *    tap & hold "Save Image" / "Download Image" directly inside Telegram.
+ * 3. Telegram Mini App / In-App WebView:
+ *    - Automatically handles Telegram webview restrictions, WebApp downloadFile if available,
+ *      and opens the high-res tap-and-save sheet.
  */
 
 export interface TelegramWebApp {
@@ -30,6 +36,13 @@ declare global {
     Telegram?: {
       WebApp?: TelegramWebApp;
     };
+    showSaveFilePicker?: (options?: {
+      suggestedName?: string;
+      types?: Array<{
+        description: string;
+        accept: Record<string, string[]>;
+      }>;
+    }) => Promise<FileSystemFileHandle>;
   }
 }
 
@@ -43,104 +56,202 @@ export function isTelegramMiniApp(): boolean {
   );
 }
 
+export function isMobileDevice(): boolean {
+  if (typeof window === 'undefined') return false;
+  const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera || '';
+  const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+  const isTouchScreen = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  const isNarrowScreen = window.innerWidth <= 768;
+  return isMobileUA || (isTouchScreen && isNarrowScreen);
+}
+
+export interface DownloadResult {
+  success: boolean;
+  method: 'file_picker' | 'mobile_share' | 'mobile_auto_save' | 'telegram_api' | 'telegram_preview' | 'browser_download' | 'cancelled';
+  previewFallbackUrl?: string;
+  message: string;
+}
+
 /**
- * Downloads or shares canvas image safely across Desktop, Mobile, and Telegram WebApp.
- * Returns { success: boolean; method: string; previewFallbackUrl?: string }
+ * Universally downloads/saves canvas poster according to device capabilities.
  */
 export async function downloadCanvasImage(
   canvas: HTMLCanvasElement,
   fileName: string,
   format: 'png' | 'jpeg' = 'png'
-): Promise<{ success: boolean; method: string; previewFallbackUrl?: string; message?: string }> {
+): Promise<DownloadResult> {
   const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
   const fullFileName = fileName.endsWith(`.${format}`) ? fileName : `${fileName}.${format}`;
 
   // 1. Convert canvas to blob
   const blob = await new Promise<Blob | null>((resolve) => {
-    canvas.toBlob((b) => resolve(b), mimeType, 0.95);
+    canvas.toBlob((b) => resolve(b), mimeType, 0.96);
   });
 
   if (!blob) {
     throw new Error('Canvas blob generation failed');
   }
 
-  // 2. If running inside Telegram Mini App
   const isTg = isTelegramMiniApp();
+  const isMobile = isMobileDevice();
 
-  // Try Web Share API with files (Supported in iOS/Android Telegram Webview!)
-  // This allows direct "Save Image to Camera Roll / Photos" or forwarding!
-  if (navigator.share && navigator.canShare) {
-    try {
-      const file = new File([blob], fullFileName, { type: mimeType });
-      if (navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: fullFileName,
-          text: 'Cyber Sentinel Poster Studio',
+  // ==========================================
+  // CASE 1: COMPUTER / DESKTOP (PC / Mac / Linux)
+  // Show native OS File Menu popup ("Save As" dialog)
+  // ==========================================
+  if (!isMobile && !isTg) {
+    // Try File System Access API (showSaveFilePicker)
+    // This pops up the native Windows / Mac OS File Explorer / Finder dialog
+    // so the user can choose the exact directory (Desktop, Downloads, Pictures, etc.) and file name!
+    if (typeof window.showSaveFilePicker === 'function') {
+      try {
+        const fileHandle = await window.showSaveFilePicker({
+          suggestedName: fullFileName,
+          types: [
+            {
+              description: format === 'jpeg' ? 'JPEG Image' : 'PNG Image',
+              accept: {
+                [mimeType]: [`.${format}`],
+              },
+            },
+          ],
         });
-        return { success: true, method: 'share', message: 'সফলভাবে শেয়ার ও সেভ সম্পন্ন হয়েছে!' };
+
+        // Write blob data to the chosen file handle
+        const writable = await fileHandle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+
+        return {
+          success: true,
+          method: 'file_picker',
+          message: '✓ ফাইলটি আপনার কম্পিউটারে সফলভাবে সেভ করা হয়েছে!',
+        };
+      } catch (pickerErr: any) {
+        // User closed or cancelled the file menu dialog
+        if (pickerErr.name === 'AbortError') {
+          return {
+            success: true,
+            method: 'cancelled',
+            message: 'সেভ উইন্ডো বাতিল করা হয়েছে।',
+          };
+        }
+        console.warn('showSaveFilePicker failed or not allowed, falling back to standard download:', pickerErr);
       }
-    } catch (shareErr: any) {
-      // User cancelled share dialog is not an error
-      if (shareErr.name === 'AbortError') {
-        return { success: true, method: 'cancelled', message: 'শেয়ার বাতিল করা হয়েছে' };
-      }
-      console.warn('Navigator share with file failed, falling back:', shareErr);
+    }
+
+    // Desktop Fallback (e.g. Firefox, Safari Desktop, or if user blocked file system access)
+    try {
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = fullFileName;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+
+      return {
+        success: true,
+        method: 'browser_download',
+        message: '✓ পোস্টারটি আপনার কম্পিউটার ডাউনলোড ফোল্ডারে সেভ হয়েছে!',
+      };
+    } catch (desktopErr) {
+      console.error('Desktop standard download error:', desktopErr);
     }
   }
 
-  // Check Telegram WebApp downloadFile API (Bot API 8+)
-  if (window.Telegram?.WebApp?.downloadFile) {
+  // ==========================================
+  // CASE 2: MOBILE DEVICES (Android, iOS, Tablets)
+  // Direct save to Google Photos / Gallery / Files
+  // ==========================================
+  if (isMobile) {
+    // 2.A: Try Web Share API with File
+    // On Android (Chrome, Edge, Samsung Internet), this triggers the native system share sheet
+    // which has options: "Upload to Google Photos" (Google ফটোতে সেভ), "Save to device / Gallery", etc.
+    if (navigator.share && navigator.canShare) {
+      try {
+        const file = new File([blob], fullFileName, { type: mimeType });
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: fullFileName,
+            text: 'Cyber Sentinel Poster Studio (গুগল ফটো বা গ্যালারিতে সেভ করুন)',
+          });
+
+          return {
+            success: true,
+            method: 'mobile_share',
+            message: '✓ গুগল ফটো বা গ্যালারিতে সফলভাবে পাঠানো ও সেভ করা হয়েছে!',
+          };
+        }
+      } catch (shareErr: any) {
+        if (shareErr.name === 'AbortError') {
+          return {
+            success: true,
+            method: 'cancelled',
+            message: 'সেভ ডায়লগ বাতিল করা হয়েছে।',
+          };
+        }
+        console.warn('Mobile navigator.share failed, using direct download & preview:', shareErr);
+      }
+    }
+
+    // 2.B: On Mobile, also trigger automatic direct download so the file goes to Downloads/Photos
     try {
-      const dataUrl = canvas.toDataURL(mimeType, 0.95);
+      const blobUrl = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = blobUrl;
+      link.download = fullFileName;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+    } catch (e) {
+      console.warn('Mobile automatic click download failed:', e);
+    }
+
+    // Also prepare fallback preview modal for mobile web / Telegram so user can tap & hold
+    // "Save to Photos" if the browser blocks automatic saving.
+    const previewDataUrl = canvas.toDataURL(mimeType, 0.96);
+    return {
+      success: true,
+      method: isTg ? 'telegram_preview' : 'mobile_auto_save',
+      previewFallbackUrl: previewDataUrl,
+      message: '✓ মোবাইলের গ্যালারি বা গুগল ফটোতে সেভ করতে প্রস্তুত!',
+    };
+  }
+
+  // ==========================================
+  // CASE 3: TELEGRAM MINI APP (Bot API 8+)
+  // ==========================================
+  if (isTg && window.Telegram?.WebApp?.downloadFile) {
+    try {
+      const dataUrl = canvas.toDataURL(mimeType, 0.96);
       window.Telegram.WebApp.downloadFile({
         url: dataUrl,
         file_name: fullFileName,
       });
-      return { success: true, method: 'telegram_api', message: 'টেলিগ্রাম ডাউনলোড শুরু হয়েছে!' };
+      return {
+        success: true,
+        method: 'telegram_api',
+        message: 'টেলিগ্রাম ডাউনলোড শুরু হয়েছে!',
+      };
     } catch (tgErr) {
       console.warn('Telegram downloadFile API failed:', tgErr);
     }
   }
 
-  // Standard Web Download using <a> element with ObjectURL
-  try {
-    const blobUrl = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = blobUrl;
-    link.download = fullFileName;
-    link.style.display = 'none';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    // Keep blob URL alive briefly before revoking
-    setTimeout(() => {
-      URL.revokeObjectURL(blobUrl);
-    }, 45000);
-
-    // If in Telegram and we got here, Telegram might block the silent <a> click.
-    // Return the previewFallbackUrl so a visual tap-and-save modal can be displayed!
-    if (isTg) {
-      const previewDataUrl = canvas.toDataURL(mimeType, 0.95);
-      return {
-        success: true,
-        method: 'telegram_preview',
-        previewFallbackUrl: previewDataUrl,
-        message: 'টেলিগ্রাম অ্যাপের জন্য ছবি নিচে ওপেন হয়েছে, ছবিতে চাপ দিয়ে ধরে সেভ করুন!',
-      };
-    }
-
-    return { success: true, method: 'browser_download', message: 'পোস্টার সফলভাবে ডাউনলোড হয়েছে!' };
-  } catch (err: any) {
-    console.error('Download link trigger failed:', err);
-    // As last resort, return dataUrl for user to save
-    const dataUrl = canvas.toDataURL(mimeType, 0.95);
-    return {
-      success: true,
-      method: 'data_url_preview',
-      previewFallbackUrl: dataUrl,
-      message: 'ছবিতে চাপ দিয়ে ধরে (Tap and hold) আপনার ডিভাইসে সেভ করুন।',
-    };
-  }
+  // Final fallback
+  const fallbackDataUrl = canvas.toDataURL(mimeType, 0.96);
+  return {
+    success: true,
+    method: 'telegram_preview',
+    previewFallbackUrl: fallbackDataUrl,
+    message: 'পোস্টারটি প্রস্তুত হয়েছে! ছবিতে চাপ দিয়ে ধরে সেভ করুন।',
+  };
 }

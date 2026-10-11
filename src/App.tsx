@@ -42,14 +42,14 @@ const DEFAULT_CONFIG: PosterConfig = {
   rightImageOffsetY: 0,
   imageCornerRadius: 0,
 
-  bannerReasonText: 'প্রতিনিয়ত হ্যা,রেস,মেন্ট করার অ,প,রা,ধে',
-  bannerActionText: 'একটি আইডি রি,মু,ভ করা হলো ',
+  bannerReasonText: 'প্রতিনিয়ত হ্যারাসমেন্ট করার অপরাধে',
+  bannerActionText: 'একটি আইডি রিমুভ করা হলো ',
   bannerTeamText: 'TEAM CSB',
-  bannerFooterText: 'পক্ষ থেকে।',
+  bannerFooterText: '-এর পক্ষ থেকে।',
 
   useFreeformBanner: true,
   freeformText:
-    'প্রতিনিয়ত হ্যা,রেস,মেন্ট করার অ,প,রা,ধে\nএকটি আইডি রি,মু,ভ করা হলো [color:#dc2626]TEAM CSB[/color]\nপক্ষ থেকে।',
+    'প্রতিনিয়ত হ্যারাসমেন্ট করার অপরাধে\nএকটি আইডি রিমুভ করা হলো [color:#dc2626]TEAM CSB[/color]\n-এর পক্ষ থেকে।',
 
   bannerBgColor: '#ffffff',
   bannerBorderColor: '#dc2626',
@@ -313,7 +313,7 @@ export default function App() {
       rightImageOffsetX: 0,
       rightImageOffsetY: 0,
       freeformText:
-        'প্রতিনিয়ত হ্যা,রেস,মেন্ট করার অ,প,রা,ধে\nএকটি আইডি রি,মু,ভ করা হলো [color:#dc2626]TEAM CSB[/color]\nপক্ষ থেকে।',
+        'প্রতিনিয়ত হ্যারাসমেন্ট করার অপরাধে\nএকটি আইডি রিমুভ করা হলো [color:#dc2626]TEAM CSB[/color]\n-এর পক্ষ থেকে।',
       watermarkTitle: 'CYBER SENTINEL',
       watermarkSubtitle: 'BANGLADESH',
       customEmblemSrc: '/csb-logo.jpg',

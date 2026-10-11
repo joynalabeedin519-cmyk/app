@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import { Download, X, Share2, Copy, Check, ExternalLink, HelpCircle } from 'lucide-react';
+import { Download, X, Share2, Copy, Check, ExternalLink, HelpCircle, HardDrive, Smartphone, Sparkles } from 'lucide-react';
+import { isMobileDevice, isTelegramMiniApp } from '../utils/telegramDownload';
 
 interface TelegramDownloadModalProps {
   isOpen: boolean;
@@ -17,6 +18,8 @@ export const TelegramDownloadModal: React.FC<TelegramDownloadModalProps> = ({
   resolution = 1080,
 }) => {
   const [copied, setCopied] = useState(false);
+  const isMobile = isMobileDevice();
+  const isTg = isTelegramMiniApp();
 
   if (!isOpen || !imageUrl) return null;
 
@@ -30,10 +33,10 @@ export const TelegramDownloadModal: React.FC<TelegramDownloadModalProps> = ({
     }
   };
 
-  const handleShare = async () => {
+  // Mobile Web Share / Google Photos / Gallery save
+  const handleShareOrPhotosSave = async () => {
     try {
       if (navigator.share) {
-        // Convert dataUrl to blob for sharing if supported
         const res = await fetch(imageUrl);
         const blob = await res.blob();
         const file = new File([blob], fileName, { type: blob.type || 'image/png' });
@@ -41,17 +44,47 @@ export const TelegramDownloadModal: React.FC<TelegramDownloadModalProps> = ({
           await navigator.share({
             files: [file],
             title: fileName,
-            text: 'Cyber Sentinel Poster',
+            text: 'Cyber Sentinel Poster - গুগল ফটো বা গ্যালারিতে সেভ করুন',
           });
           return;
         }
       }
-    } catch (err) {
+    } catch (err: any) {
+      if (err.name === 'AbortError') return;
       console.warn('Share failed:', err);
     }
 
-    // Fallback: trigger standard open
-    window.open(imageUrl, '_blank');
+    // Direct download fallback
+    handleDirectDownload();
+  };
+
+  // PC / Desktop Save with File Picker or Direct download
+  const handleDesktopFilePickerDownload = async () => {
+    try {
+      if (typeof window.showSaveFilePicker === 'function') {
+        const res = await fetch(imageUrl);
+        const blob = await res.blob();
+        const handle = await window.showSaveFilePicker({
+          suggestedName: fileName,
+          types: [
+            {
+              description: 'PNG Image',
+              accept: { 'image/png': ['.png'] },
+            },
+          ],
+        });
+        const writable = await handle.createWritable();
+        await writable.write(blob);
+        await writable.close();
+        onClose();
+        return;
+      }
+    } catch (e: any) {
+      if (e.name === 'AbortError') return;
+      console.warn('File picker aborted or unsupported:', e);
+    }
+
+    handleDirectDownload();
   };
 
   const handleDirectDownload = () => {
@@ -59,6 +92,8 @@ export const TelegramDownloadModal: React.FC<TelegramDownloadModalProps> = ({
       const link = document.createElement('a');
       link.href = imageUrl;
       link.download = fileName;
+      link.target = '_blank';
+      link.rel = 'noopener';
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -90,31 +125,44 @@ export const TelegramDownloadModal: React.FC<TelegramDownloadModalProps> = ({
                   {resolution}px
                 </span>
               </h3>
-              <p className="text-xs text-slate-400">টেলিগ্রাম ও মোবাইলে সহজে সেভ করার উপায়</p>
+              <p className="text-xs text-slate-400">
+                {isMobile ? 'মোবাইল ও গুগল ফটো / গ্যালারিতে সেভ করুন' : 'কম্পিউটার নির্দিষ্ট ফোল্ডারে সেভ করুন'}
+              </p>
             </div>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            className="p-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition cursor-pointer"
             title="বন্ধ করুন"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Telegram Instruction Alert */}
-        <div className="my-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-200 text-xs flex items-start gap-2.5 shrink-0">
-          <HelpCircle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
-          <div className="leading-relaxed">
-            <span className="font-semibold text-amber-300">টেলিগ্রাম সেভ নিয়ম:</span> নিচের ছবির উপর{' '}
-            <strong className="text-white underline underline-offset-2">চাপ দিয়ে ধরে রাখুন (Tap & Hold)</strong>{' '}
-            এবং <strong className="text-white">"Save Image"</strong> বা <strong className="text-white">"Download"</strong> এ টিপ দিন।
+        {/* Dynamic Helpful Instruction Box based on device */}
+        {isMobile ? (
+          <div className="my-3 p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-200 text-xs flex items-start gap-2.5 shrink-0">
+            <Smartphone className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+            <div className="leading-relaxed">
+              <span className="font-semibold text-emerald-300">মোবাইল ইউজারদের জন্য:</span> নিচের{' '}
+              <strong className="text-white">"গুগল ফটো / গ্যালারিতে সেভ করুন"</strong> বাটনে চাপ দিন, অথবা ছবির উপর{' '}
+              <strong className="text-white underline underline-offset-2">চাপ দিয়ে ধরে রাখুন (Tap & Hold)</strong>{' '}
+              করে সরাসরি <strong className="text-white">"Save Image"</strong> সিলেক্ট করুন।
+            </div>
           </div>
-        </div>
+        ) : (
+          <div className="my-3 p-3 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-200 text-xs flex items-start gap-2.5 shrink-0">
+            <HardDrive className="w-4 h-4 text-blue-400 shrink-0 mt-0.5" />
+            <div className="leading-relaxed">
+              <span className="font-semibold text-blue-300">কম্পিউটার ইউজারদের জন্য:</span>{' '}
+              <strong className="text-white">"ফোল্ডার সিলেক্ট করে সেভ করুন"</strong> এ ক্লিক করলে আপনার পিসির ফাইল মেনু ওপেন হবে, যেখান থেকে পছন্দের ড্রাইভ/ফোল্ডারে সেভ করতে পারবেন।
+            </div>
+          </div>
+        )}
 
         {/* Poster Image Preview */}
-        <div className="relative flex-1 min-h-[180px] max-h-[380px] bg-slate-950/80 rounded-xl border border-slate-800 overflow-auto flex items-center justify-center p-2">
+        <div className="relative flex-1 min-h-[180px] max-h-[360px] bg-slate-950/80 rounded-xl border border-slate-800 overflow-auto flex items-center justify-center p-2">
           <img
             src={imageUrl}
             alt={fileName}
@@ -122,28 +170,53 @@ export const TelegramDownloadModal: React.FC<TelegramDownloadModalProps> = ({
           />
         </div>
 
-        {/* Bottom Actions */}
+        {/* Bottom Actions tailored to Device */}
         <div className="pt-3 border-t border-slate-800/80 mt-3 flex flex-col sm:flex-row gap-2 shrink-0">
-          {/* Share / Open Sheet */}
-          <button
-            type="button"
-            onClick={handleShare}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-4 text-xs sm:text-sm font-bold rounded-xl bg-blue-600 hover:bg-blue-500 text-white shadow-md shadow-blue-900/30 transition cursor-pointer active:scale-95"
-          >
-            <Share2 className="w-4 h-4" />
-            <span>গ্যালারিতে সেভ / শেয়ার করুন</span>
-          </button>
+          {isMobile ? (
+            <>
+              {/* Mobile: Direct Share & Save to Google Photos */}
+              <button
+                type="button"
+                onClick={handleShareOrPhotosSave}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-4 text-xs sm:text-sm font-bold rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-md shadow-emerald-900/30 transition cursor-pointer active:scale-95"
+              >
+                <Share2 className="w-4 h-4" />
+                <span>গুগল ফটো / গ্যালারিতে সেভ করুন</span>
+              </button>
 
-          {/* Browser Download */}
-          <button
-            type="button"
-            onClick={handleDirectDownload}
-            className="flex items-center justify-center gap-1.5 py-2.5 px-3.5 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer active:scale-95"
-            title="সরাসরি ডাউনলোড করার চেষ্টা করুন"
-          >
-            <Download className="w-4 h-4 text-emerald-400" />
-            <span>সরাসরি ডাউনলোড</span>
-          </button>
+              <button
+                type="button"
+                onClick={handleDirectDownload}
+                className="flex items-center justify-center gap-1.5 py-2.5 px-3.5 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer active:scale-95"
+                title="সরাসরি ডাউনলোড"
+              >
+                <Download className="w-4 h-4 text-blue-400" />
+                <span>ডাউনলোড</span>
+              </button>
+            </>
+          ) : (
+            <>
+              {/* PC / Laptop: File Picker Save As menu dialog */}
+              <button
+                type="button"
+                onClick={handleDesktopFilePickerDownload}
+                className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-4 text-xs sm:text-sm font-bold rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-md shadow-blue-900/30 transition cursor-pointer active:scale-95"
+              >
+                <HardDrive className="w-4 h-4 text-cyan-300" />
+                <span>ফোল্ডার সিলেক্ট করে সেভ করুন (Save As)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleDirectDownload}
+                className="flex items-center justify-center gap-1.5 py-2.5 px-3.5 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition cursor-pointer active:scale-95"
+                title="সরাসরি ডাউনলোড ফোল্ডারে সেভ করুন"
+              >
+                <Download className="w-4 h-4 text-emerald-400" />
+                <span>সরাসরি ডাউনলোড</span>
+              </button>
+            </>
+          )}
 
           {/* Close */}
           <button
