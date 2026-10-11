@@ -10,6 +10,9 @@ import {
   Undo2,
   Maximize2,
   Check,
+  RotateCcw,
+  Link,
+  Layers,
 } from 'lucide-react';
 
 interface TextControlPanelProps {
@@ -17,6 +20,27 @@ interface TextControlPanelProps {
   onChangeConfig: (newConfig: Partial<PosterConfig>) => void;
   onApplyPreset: (preset: PresetTemplate) => void;
 }
+
+const BORDER_COLOR_PRESETS = [
+  { name: 'ক্লাসিক লাল', color: '#dc2626', bgClass: 'bg-red-600' },
+  { name: 'গাঢ় ক্রিমসন', color: '#991b1b', bgClass: 'bg-red-800' },
+  { name: 'উজ্জ্বল রুবি', color: '#ef4444', bgClass: 'bg-red-500' },
+  { name: 'সাইবার সায়ান', color: '#06b6d4', bgClass: 'bg-cyan-500' },
+  { name: 'ইলেকট্রিক ব্লু', color: '#2563eb', bgClass: 'bg-blue-600' },
+  { name: 'নিয়ন গ্রিন', color: '#10b981', bgClass: 'bg-emerald-500' },
+  { name: 'গোল্ডেন ইয়েলো', color: '#eab308', bgClass: 'bg-yellow-500' },
+  { name: 'রয়্যাল পার্পল', color: '#9333ea', bgClass: 'bg-purple-600' },
+  { name: 'পিওর হোয়াইট', color: '#ffffff', bgClass: 'bg-white' },
+  { name: 'ডার্ক চারকোল', color: '#1e293b', bgClass: 'bg-slate-800' },
+];
+
+const BG_COLOR_PRESETS = [
+  { name: 'সাদা', color: '#ffffff' },
+  { name: 'হালকা গ্রে', color: '#f8fafc' },
+  { name: 'ডার্ক স্লেট', color: '#0f172a' },
+  { name: 'ডার্ক সায়ান', color: '#022c35' },
+  { name: 'কালো', color: '#000000' },
+];
 
 const PALETTE_COLORS = [
   { name: 'লাল (Red)', hex: '#dc2626' },
@@ -89,6 +113,7 @@ export const TextControlPanel: React.FC<TextControlPanelProps> = ({
   onApplyPreset,
 }) => {
   const [customColor, setCustomColor] = useState<string>('#dc2626');
+  const [syncWithOuterBorder, setSyncWithOuterBorder] = useState<boolean>(true);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   // Apply color to currently highlighted text selection in textarea
@@ -420,71 +445,257 @@ export const TextControlPanel: React.FC<TextControlPanelProps> = ({
             </div>
           </div>
 
-          {/* Border, Radius & Color controls */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-1">
-            <div className="p-3 rounded-xl bg-slate-950/50 border border-slate-800/80">
-              <div className="flex justify-between text-slate-300 mb-1">
-                <span>ব্যানার কর্নার রাউন্ড</span>
-                <span className="font-mono text-cyan-300 font-bold">
-                  {config.bannerCornerRadius}px
+          {/* Frame & Banner Border Color Styling Settings */}
+          <div className="p-4 rounded-xl bg-slate-950/70 border border-slate-800/80 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-800/80 pb-2.5">
+              <div className="flex items-center gap-2">
+                <Palette className="w-4 h-4 text-cyan-400" />
+                <span className="text-xs font-bold text-white">
+                  পোস্টারের বর্ডার ও ব্যাকগ্রাউন্ড কালার (Border & Style)
                 </span>
               </div>
-              <input
-                type="range"
-                min="0"
-                max="40"
-                step="2"
-                value={config.bannerCornerRadius}
-                onChange={(e) =>
-                  onChangeConfig({ bannerCornerRadius: parseInt(e.target.value) })
-                }
-                className="w-full accent-blue-500 cursor-pointer"
-              />
-            </div>
-
-            <div className="p-3 rounded-xl bg-slate-950/50 border border-slate-800/80">
-              <div className="flex justify-between text-slate-300 mb-1">
-                <span>লাল বর্ডার এর প্রস্থ</span>
-                <span className="font-mono text-cyan-300 font-bold">
-                  {config.bannerBorderWidth}px
+              <div className="flex items-center gap-2">
+                <span
+                  className="w-3.5 h-3.5 rounded-full border border-white/40 shadow-sm"
+                  style={{ backgroundColor: config.bannerBorderColor || '#dc2626' }}
+                  title="বর্তমান বর্ডার কালার"
+                />
+                <span className="text-[11px] font-mono font-bold text-slate-300">
+                  {config.bannerBorderColor || '#dc2626'}
                 </span>
               </div>
-              <input
-                type="range"
-                min="4"
-                max="20"
-                step="1"
-                value={config.bannerBorderWidth}
-                onChange={(e) =>
-                  onChangeConfig({ bannerBorderWidth: parseInt(e.target.value) })
-                }
-                className="w-full accent-blue-500 cursor-pointer"
-              />
             </div>
 
-            <div className="p-3 rounded-xl bg-slate-950/50 border border-slate-800/80 flex items-center justify-around">
-              <div className="flex items-center gap-2">
+            {/* Sync checkbox & 1-click apply button */}
+            <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl bg-blue-950/40 border border-blue-500/30 text-xs">
+              <label className="flex items-center gap-2 cursor-pointer text-slate-200 select-none">
                 <input
-                  type="color"
-                  value={config.bannerBorderColor || '#dc2626'}
-                  onChange={(e) =>
-                    onChangeConfig({ bannerBorderColor: e.target.value })
-                  }
-                  className="w-6 h-6 rounded border border-slate-700 bg-transparent cursor-pointer"
+                  type="checkbox"
+                  checked={syncWithOuterBorder}
+                  onChange={(e) => {
+                    const checked = e.target.checked;
+                    setSyncWithOuterBorder(checked);
+                    if (checked) {
+                      const color = config.bannerBorderColor || '#dc2626';
+                      onChangeConfig({
+                        outerBorderColor: color,
+                        dividerColor: color,
+                      });
+                    }
+                  }}
+                  className="rounded accent-blue-500 cursor-pointer w-4 h-4"
                 />
-                <span className="text-[11px] text-slate-300">বর্ডার</span>
+                <span className="font-semibold text-blue-200 text-[11px]">
+                  ছবির চারপাশের ফ্রেম ও ব্যানার বর্ডার একই কালার রাখুন
+                </span>
+              </label>
+              <button
+                type="button"
+                onClick={() => {
+                  const targetColor = config.bannerBorderColor || '#dc2626';
+                  onChangeConfig({
+                    outerBorderColor: targetColor,
+                    dividerColor: targetColor,
+                  });
+                }}
+                className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-600/30 hover:bg-blue-600/50 text-cyan-300 border border-blue-400/30 transition text-[11px] font-semibold cursor-pointer active:scale-95"
+                title="ছবির ফ্রেম ও মাঝের ডিভাইডারে এই কালার প্রয়োগ করুন"
+              >
+                <Link className="w-3 h-3 text-cyan-400" />
+                <span>ছবির ফ্রেমে প্রয়োগ করুন</span>
+              </button>
+            </div>
+
+            {/* Banner Border Color Palette Presets */}
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-semibold text-slate-200">
+                  ব্যানার বর্ডার কালার নির্বাচন করুন:
+                </label>
+                {(config.bannerBorderColor || '#dc2626').toLowerCase() !== '#dc2626' && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (syncWithOuterBorder) {
+                        onChangeConfig({
+                          bannerBorderColor: '#dc2626',
+                          outerBorderColor: '#dc2626',
+                          dividerColor: '#dc2626',
+                        });
+                      } else {
+                        onChangeConfig({ bannerBorderColor: '#dc2626' });
+                      }
+                    }}
+                    className="text-[11px] text-slate-400 hover:text-red-400 flex items-center gap-1 cursor-pointer transition"
+                  >
+                    <RotateCcw className="w-3 h-3 text-red-400" />
+                    <span>ডিফল্ট লাল</span>
+                  </button>
+                )}
               </div>
 
-              <div className="flex items-center gap-2">
+              {/* Quick Palette Buttons */}
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                {BORDER_COLOR_PRESETS.map((item) => {
+                  const isSelected =
+                    (config.bannerBorderColor || '#dc2626').toLowerCase() ===
+                    item.color.toLowerCase();
+                  return (
+                    <button
+                      key={item.color}
+                      type="button"
+                      onClick={() => {
+                        if (syncWithOuterBorder) {
+                          onChangeConfig({
+                            bannerBorderColor: item.color,
+                            outerBorderColor: item.color,
+                            dividerColor: item.color,
+                          });
+                        } else {
+                          onChangeConfig({ bannerBorderColor: item.color });
+                        }
+                      }}
+                      className={`flex items-center gap-2 p-2 rounded-xl border text-xs font-medium transition cursor-pointer active:scale-95 ${
+                        isSelected
+                          ? 'bg-slate-800 border-cyan-400 text-white shadow-md shadow-cyan-900/30 ring-1 ring-cyan-400'
+                          : 'bg-slate-950/70 border-slate-800 text-slate-300 hover:text-white hover:bg-slate-800/60'
+                      }`}
+                    >
+                      <span
+                        className={`w-3 h-3 rounded-full border border-white/30 shrink-0 ${item.bgClass}`}
+                        style={{ backgroundColor: item.color }}
+                      />
+                      <span className="truncate text-[11px]">{item.name}</span>
+                      {isSelected && (
+                        <Check className="w-3 h-3 ml-auto text-cyan-400 shrink-0" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Custom Color Input with Native Picker and Hex Input */}
+              <div className="flex flex-wrap items-center gap-3 p-2.5 rounded-xl bg-slate-900/80 border border-slate-800">
+                <div className="flex items-center gap-2">
+                  <label
+                    htmlFor="bannerBorderColorPicker"
+                    className="text-[11px] font-medium text-slate-300 cursor-pointer"
+                  >
+                    কাস্টম বর্ডার কালার:
+                  </label>
+                  <input
+                    id="bannerBorderColorPicker"
+                    type="color"
+                    value={config.bannerBorderColor || '#dc2626'}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (syncWithOuterBorder) {
+                        onChangeConfig({
+                          bannerBorderColor: val,
+                          outerBorderColor: val,
+                          dividerColor: val,
+                        });
+                      } else {
+                        onChangeConfig({ bannerBorderColor: val });
+                      }
+                    }}
+                    className="w-7 h-7 rounded-lg cursor-pointer border border-slate-700 bg-transparent p-0.5"
+                  />
+                </div>
+
+                <div className="flex items-center gap-1.5 ml-auto">
+                  <span className="text-[11px] text-slate-400 font-mono">HEX:</span>
+                  <input
+                    type="text"
+                    value={config.bannerBorderColor || '#dc2626'}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (syncWithOuterBorder) {
+                        onChangeConfig({
+                          bannerBorderColor: val,
+                          outerBorderColor: val,
+                          dividerColor: val,
+                        });
+                      } else {
+                        onChangeConfig({ bannerBorderColor: val });
+                      }
+                    }}
+                    placeholder="#dc2626"
+                    className="w-24 px-2 py-1 bg-slate-950 border border-slate-700 rounded-lg text-xs font-mono text-cyan-300 focus:outline-none focus:border-cyan-400"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Sliders for Width, Corner Radius, and Background */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs pt-2 border-t border-slate-800/80">
+              <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                <div className="flex justify-between text-slate-300 mb-1">
+                  <span>ব্যানার বর্ডারের প্রস্থ</span>
+                  <span className="font-mono text-cyan-300 font-bold">{config.bannerBorderWidth}px</span>
+                </div>
                 <input
-                  type="color"
-                  value={config.bannerBgColor || '#ffffff'}
+                  type="range"
+                  min="2"
+                  max="24"
+                  step="1"
+                  value={config.bannerBorderWidth}
                   onChange={(e) =>
-                    onChangeConfig({ bannerBgColor: e.target.value })
+                    onChangeConfig({ bannerBorderWidth: parseInt(e.target.value) })
                   }
-                  className="w-6 h-6 rounded border border-slate-700 bg-transparent cursor-pointer"
+                  className="w-full accent-blue-500 cursor-pointer"
                 />
-                <span className="text-[11px] text-slate-300">ব্যাকগ্রাউন্ড</span>
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800">
+                <div className="flex justify-between text-slate-300 mb-1">
+                  <span>ব্যানার কর্নার রাউন্ড</span>
+                  <span className="font-mono text-cyan-300 font-bold">{config.bannerCornerRadius}px</span>
+                </div>
+                <input
+                  type="range"
+                  min="0"
+                  max="40"
+                  step="2"
+                  value={config.bannerCornerRadius}
+                  onChange={(e) =>
+                    onChangeConfig({ bannerCornerRadius: parseInt(e.target.value) })
+                  }
+                  className="w-full accent-blue-500 cursor-pointer"
+                />
+              </div>
+
+              <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between">
+                <div className="flex justify-between text-slate-300 mb-1">
+                  <span>ব্যানার ব্যাকগ্রাউন্ড</span>
+                  <span className="font-mono text-cyan-300 font-bold">{config.bannerBgColor || '#ffffff'}</span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <input
+                    type="color"
+                    value={config.bannerBgColor || '#ffffff'}
+                    onChange={(e) =>
+                      onChangeConfig({ bannerBgColor: e.target.value })
+                    }
+                    className="w-7 h-7 rounded border border-slate-700 bg-transparent cursor-pointer"
+                  />
+                  <div className="flex items-center gap-1 flex-1">
+                    {BG_COLOR_PRESETS.map((bg) => (
+                      <button
+                        key={bg.color}
+                        type="button"
+                        onClick={() => onChangeConfig({ bannerBgColor: bg.color })}
+                        title={bg.name}
+                        className={`w-4 h-4 rounded-full border text-[9px] transition cursor-pointer ${
+                          (config.bannerBgColor || '#ffffff').toLowerCase() === bg.color.toLowerCase()
+                            ? 'border-cyan-400 ring-1 ring-cyan-400'
+                            : 'border-slate-700 hover:border-slate-500'
+                        }`}
+                        style={{ backgroundColor: bg.color }}
+                      />
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           </div>

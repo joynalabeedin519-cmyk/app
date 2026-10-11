@@ -109,6 +109,24 @@ function roundRect(
   ctx.closePath();
 }
 
+function hexToRgba(hex: string, alpha: number = 0.4): string {
+  if (!hex) return `rgba(220, 38, 38, ${alpha})`;
+  if (hex.startsWith('rgba') || hex.startsWith('rgb')) return hex;
+  const cleanHex = hex.replace('#', '');
+  if (cleanHex.length === 3) {
+    const r = parseInt(cleanHex[0] + cleanHex[0], 16);
+    const g = parseInt(cleanHex[1] + cleanHex[1], 16);
+    const b = parseInt(cleanHex[2] + cleanHex[2], 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  } else if (cleanHex.length === 6) {
+    const r = parseInt(cleanHex.substring(0, 2), 16);
+    const g = parseInt(cleanHex.substring(2, 4), 16);
+    const b = parseInt(cleanHex.substring(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+  }
+  return `rgba(220, 38, 38, ${alpha})`;
+}
+
 /**
  * Renders the consolidated Cyber Sentinel Bangladesh poster to a canvas.
  */
@@ -295,10 +313,11 @@ export async function renderPoster(
   ctx.restore();
 
   // ==========================================
-  // 4. Draw Split Screen Outer Red Borders & Center Divider
+  // 4. Draw Split Screen Outer Borders & Center Divider
   // ==========================================
   ctx.save();
-  ctx.strokeStyle = config.outerBorderColor || '#dc2626';
+  const frameBorderColor = config.outerBorderColor || '#dc2626';
+  ctx.strokeStyle = frameBorderColor;
   ctx.lineWidth = redFrameBorderWidth;
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
@@ -313,8 +332,8 @@ export async function renderPoster(
   roundRect(ctx, rightX, rightY, rightW, rightH, borderR);
   ctx.stroke();
 
-  // Red glow on frame border
-  ctx.strokeStyle = 'rgba(239, 68, 68, 0.4)';
+  // Atmospheric glow matching the selected border color
+  ctx.strokeStyle = hexToRgba(frameBorderColor, 0.38);
   ctx.lineWidth = redFrameBorderWidth + 4 * scale;
   if (userImgRadius > 0) {
     roundRect(ctx, leftX, leftY, leftW, leftH, borderR);
@@ -398,14 +417,15 @@ export async function renderPoster(
   ctx.shadowBlur = 0;
   ctx.shadowOffsetY = 0;
 
-  // Banner Red Outline Border
-  ctx.strokeStyle = config.bannerBorderColor || '#dc2626';
+  // Banner Outline Border
+  const bannerBorderColor = config.bannerBorderColor || '#dc2626';
+  ctx.strokeStyle = bannerBorderColor;
   ctx.lineWidth = bannerBorderW;
   roundRect(ctx, bannerX, bannerY, bannerW, bannerH, bannerRadius);
   ctx.stroke();
 
-  // Outer red glow around banner
-  ctx.strokeStyle = 'rgba(239, 68, 68, 0.35)';
+  // Outer glow around banner matching the selected banner border color
+  ctx.strokeStyle = hexToRgba(bannerBorderColor, 0.35);
   ctx.lineWidth = bannerBorderW + 4 * scale;
   roundRect(ctx, bannerX, bannerY, bannerW, bannerH, bannerRadius);
   ctx.stroke();

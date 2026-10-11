@@ -13,9 +13,20 @@ export const NOTICE_PRESETS: PresetTemplate[] = [
     footerText: 'পক্ষ থেকে।',
   },
   {
+    id: 'adult-content-removal',
+    name: 'Adult Video & Obscene Content Removal',
+    nameBn: '২. অ্যাডাল্ট ছবি ও ভিডিও ছড়ানোর অপরাধে',
+    freeformText:
+      'অ্যাডাল্ট ভিডিও ও আপত্তিকর ছবি ছড়ানোর অপরাধে\nআইডিটি চিরতরে রিমুভ করা হলো [color:#dc2626]TEAM CSB[/color]\nপক্ষ থেকে।',
+    reasonText: 'অ্যাডাল্ট ভিডিও ও আপত্তিকর ছবি ছড়ানোর অপরাধে',
+    actionText: 'আইডিটি চিরতরে রিমুভ করা হলো ',
+    teamText: 'TEAM CSB',
+    footerText: 'পক্ষ থেকে।',
+  },
+  {
     id: 'religious-defamation',
     name: 'Religious Hate & Defamation',
-    nameBn: '২. ধর্মীয় অপপ্রচার ও কুরুচিপূর্ণ অবমাননা',
+    nameBn: '৩. ধর্মীয় অবমাননা ও অপপ্রচার',
     freeformText:
       'ধর্মীয় অনুভূতিতে আঘাত ও অপপ্রচার চালানোর অপরাধে\nআইডিটি চিরতরে রিমুভ করা হলো [color:#dc2626]TEAM CSB[/color]\nপক্ষ থেকে।',
     reasonText: 'ধর্মীয় অনুভূতিতে আঘাত ও অপপ্রচার চালানোর অপরাধে',
@@ -26,10 +37,10 @@ export const NOTICE_PRESETS: PresetTemplate[] = [
   {
     id: 'scam-fraud',
     name: 'Scam & Financial Fraud',
-    nameBn: '৩. স্ক্যাম ও আর্থিক প্রতারণা',
+    nameBn: '৪. স্ক্যাম ও আর্থিক প্রতারণা',
     freeformText:
-      'অনলাইনে প্রতারণা ও স্ক্যামিং করার অপরাধে\nঅ্যাকাউন্টটি ব্লক ও রিমুভ করা হলো [color:#dc2626]TEAM CSB[/color]\nপক্ষ থেকে।',
-    reasonText: 'অনলাইনে প্রতারণা ও স্ক্যামিং করার অপরাধে',
+      'অনলাইনে আর্থিক প্রতারণা ও স্ক্যামিং করার অপরাধে\nঅ্যাকাউন্টটি ব্লক ও রিমুভ করা হলো [color:#dc2626]TEAM CSB[/color]\nপক্ষ থেকে।',
+    reasonText: 'অনলাইনে আর্থিক প্রতারণা ও স্ক্যামিং করার অপরাধে',
     actionText: 'অ্যাকাউন্টটি ব্লক ও রিমুভ করা হলো ',
     teamText: 'TEAM CSB',
     footerText: 'পক্ষ থেকে।',
@@ -37,18 +48,18 @@ export const NOTICE_PRESETS: PresetTemplate[] = [
   {
     id: 'cyber-bullying',
     name: 'Cyber Bullying & Abusive Content',
-    nameBn: '৪. সাইবার বুলিং ও কুরুচিপূর্ণ মন্তব্য',
+    nameBn: '৫. সাইবার বুলিং ও কুরুচিপূর্ণ মন্তব্য',
     freeformText:
-      'সাইবার বুলিং ও আপত্তিকর বার্তা পাঠানোর অপরাধে\nএকটি আইডি রি,মু,ভ করা হলো [color:#dc2626]TEAM CSB[/color]\nপক্ষ থেকে সতর্কবার্তা।',
+      'সাইবার বুলিং ও আপত্তিকর বার্তা পাঠানোর অপরাধে\nএকটি আইডি রিমুভ করা হলো [color:#dc2626]TEAM CSB[/color]\nপক্ষ থেকে সতর্কবার্তা।',
     reasonText: 'সাইবার বুলিং ও আপত্তিকর বার্তা পাঠানোর অপরাধে',
-    actionText: 'একটি আইডি রি,মু,ভ করা হলো ',
+    actionText: 'একটি আইডি রিমুভ করা হলো ',
     teamText: 'TEAM CSB',
     footerText: 'পক্ষ থেকে সতর্কবার্তা।',
   },
   {
     id: 'fake-id',
     name: 'Fake Profile & Blackmail',
-    nameBn: '৫. ভুয়া আইডি খুলে ব্ল্যাকমেইল',
+    nameBn: '৬. ভুয়া আইডি খুলে ব্ল্যাকমেইল',
     freeformText:
       'ভুয়া পরিচয় দিয়ে ব্ল্যাকমেইল করার অপরাধে\nআইডিটি সফলভাবে বাতিল করা হলো [color:#dc2626]TEAM CSB[/color]\nপক্ষ থেকে কঠোর প্রতিরোধ।',
     reasonText: 'ভুয়া পরিচয় দিয়ে ব্ল্যাকমেইল করার অপরাধে',
@@ -59,7 +70,7 @@ export const NOTICE_PRESETS: PresetTemplate[] = [
   {
     id: 'extortion',
     name: 'Blackmail & Extortion Attempt',
-    nameBn: '৬. ব্ল্যাকমেইলিং ও চাঁদাবাজি',
+    nameBn: '৭. ব্ল্যাকমেইলিং ও চাঁদাবাজি',
     freeformText:
       'ব্ল্যাকমেইলিং ও চরিত্র হননের চেষ্টার অপরাধে\nআইডি স্থায়ীভাবে নিষ্ক্রিয় করা হলো [color:#dc2626]TEAM CSB[/color]\nপক্ষ থেকে কঠোর ব্যবস্থা।',
     reasonText: 'ব্ল্যাকমেইলিং ও চরিত্র হননের চেষ্টার অপরাধে',
@@ -70,7 +81,7 @@ export const NOTICE_PRESETS: PresetTemplate[] = [
   {
     id: 'women-safety',
     name: 'Protection of Women & Girls',
-    nameBn: '৭. নারী ও তরুণীদের উত্ত্যক্তকরণ',
+    nameBn: '৮. নারী ও তরুণীদের উত্ত্যক্তকরণ',
     freeformText:
       'নারী ও তরুণীদের ইনবক্সে উত্ত্যক্ত করার অপরাধে\nআইডি চিরতরে ডিলিট করা হলো [color:#dc2626]TEAM CSB[/color]\nসাইবার সুরক্ষা টিমের পক্ষ থেকে।',
     reasonText: 'নারী ও তরুণীদের ইনবক্সে উত্ত্যক্ত করার অপরাধে',
@@ -81,7 +92,7 @@ export const NOTICE_PRESETS: PresetTemplate[] = [
   {
     id: 'privacy-leak',
     name: 'Privacy Violation & Data Leak',
-    nameBn: '৮. ব্যক্তিগত ছবি ও তথ্য ফাঁস',
+    nameBn: '৯. ব্যক্তিগত ছবি ও তথ্য ফাঁস',
     freeformText:
       'ব্যক্তিগত গোপন তথ্য ও ছবি ফাঁসের অপরাধে\nআইডিটি টার্মিনেট করা হলো [color:#dc2626]TEAM CSB[/color]\nপক্ষ থেকে।',
     reasonText: 'ব্যক্তিগত গোপন তথ্য ও ছবি ফাঁসের অপরাধে',
@@ -92,7 +103,7 @@ export const NOTICE_PRESETS: PresetTemplate[] = [
   {
     id: 'phishing-attack',
     name: 'Phishing Links & Hacking Attempts',
-    nameBn: '৯. ফিশিং ও হ্যাকিং অপচেষ্টা',
+    nameBn: '১০. ফিশিং ও হ্যাকিং অপচেষ্টা',
     freeformText:
       'ফিশিং লিংক ছড়িয়ে আইডি হ্যাক করার অপরাধে\nঅ্যাকাউন্ট স্থায়ীভাবে বন্ধ করা হলো [color:#dc2626]TEAM CSB[/color]\nপক্ষ থেকে।',
     reasonText: 'ফিশিং লিংক ছড়িয়ে আইডি হ্যাক করার অপরাধে',
@@ -103,7 +114,7 @@ export const NOTICE_PRESETS: PresetTemplate[] = [
   {
     id: 'defamation-rumor',
     name: 'Defamation & Propaganda',
-    nameBn: '১০. মিথ্যা অপপ্রচার ও মানহানি',
+    nameBn: '১১. মিথ্যা অপপ্রচার ও মানহানি',
     freeformText:
       'সামাজিক মাধ্যমে মিথ্যা অপপ্রচার চালানোর অপরাধে\nআইডিটি অপসারণ করা হলো [color:#dc2626]TEAM CSB[/color]\nপক্ষ থেকে সতর্কতা।',
     reasonText: 'সামাজিক মাধ্যমে মিথ্যা অপপ্রচার চালানোর অপরাধে',
@@ -114,7 +125,7 @@ export const NOTICE_PRESETS: PresetTemplate[] = [
   {
     id: 'custom-notice',
     name: 'Emergency Cyber Action',
-    nameBn: '১১. জরুরি সাইবার একশন নোটিশ',
+    nameBn: '১২. জরুরি সাইবার অ্যাকশন নোটিশ',
     freeformText:
       'সাইবার নিরাপত্তা বিঘ্নিত করার অপরাধে\nআইডিটি সফলভাবে রিমুভ করা হলো [color:#dc2626]TEAM CSB[/color]\nপক্ষ থেকে চূড়ান্ত ব্যবস্থা।',
     reasonText: 'সাইবার নিরাপত্তা বিঘ্নিত করার অপরাধে',

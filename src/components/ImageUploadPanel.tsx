@@ -430,27 +430,28 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
         </div>
       </div>
 
-      {/* Frame Styling Settings */}
+      {/* Frame Dimensions & Corner Settings (Color is styled in Text & Banner section) */}
       <div className="bg-slate-900/85 rounded-2xl p-4 sm:p-5 border border-slate-800/80 shadow-lg shadow-black/20 backdrop-blur-md space-y-4">
         <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
           <div className="flex items-center gap-2">
-            <Layers className="w-4 h-4 text-cyan-400" />
+            <SlidersHorizontal className="w-4 h-4 text-cyan-400" />
             <h3 className="text-xs sm:text-sm font-bold text-white">
-              ফ্রেম ও লাল বর্ডার স্টাইল (Outer Frame & Divider)
+              ছবির চারপাশের ফ্রেম ও বর্ডারের আকার (Frame & Border Dimensions)
             </h3>
           </div>
         </div>
 
+        {/* Sliders for Width, Divider & Corner Radius */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
           <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
             <div className="flex justify-between text-slate-300 mb-1">
-              <span>লাল বর্ডার এর প্রস্থ</span>
+              <span>বর্ডারের প্রস্থ (Border Width)</span>
               <span className="font-mono text-cyan-300 font-bold">{config.outerBorderWidth}px</span>
             </div>
             <input
               type="range"
-              min="4"
-              max="24"
+              min="2"
+              max="28"
               step="1"
               value={config.outerBorderWidth}
               onChange={(e) =>
@@ -462,13 +463,13 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
 
           <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800/80">
             <div className="flex justify-between text-slate-300 mb-1">
-              <span>মাঝের লাল ডিভাইডার লাইন</span>
+              <span>মাঝের ডিভাইডার লাইন</span>
               <span className="font-mono text-cyan-300 font-bold">{config.dividerWidth}px</span>
             </div>
             <input
               type="range"
-              min="2"
-              max="16"
+              min="0"
+              max="20"
               step="1"
               value={config.dividerWidth}
               onChange={(e) =>
@@ -496,6 +497,10 @@ export const ImageUploadPanel: React.FC<ImageUploadPanelProps> = ({
             />
           </div>
         </div>
+
+        <p className="text-[11px] text-slate-400">
+          💡 বর্ডার ও ফ্রেমের কালার কাস্টমাইজ করতে চাইলে <b>'টেক্সট ও ব্যানার'</b> ট্যাবের কালার অপশন ব্যবহার করুন।
+        </p>
       </div>
     </div>
   );

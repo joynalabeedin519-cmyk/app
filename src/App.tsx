@@ -10,7 +10,9 @@ import { ImageUploadPanel } from './components/ImageUploadPanel';
 import { WatermarkControlPanel } from './components/WatermarkControlPanel';
 import { SavePosterModal } from './components/SavePosterModal';
 import { SavedPostersListModal } from './components/SavedPostersListModal';
+import { TelegramDownloadModal } from './components/TelegramDownloadModal';
 import { processLogoBackground } from './utils/imageProcessing';
+import { downloadCanvasImage } from './utils/telegramDownload';
 import {
   Type,
   Image as ImageIcon,
@@ -120,6 +122,9 @@ export default function App() {
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState<boolean>(false);
   const [isListModalOpen, setIsListModalOpen] = useState<boolean>(false);
+  const [telegramPreviewUrl, setTelegramPreviewUrl] = useState<string | null>(null);
+  const [telegramFileName, setTelegramFileName] = useState<string>('CSB-Notice.png');
+  const [telegramResolution, setTelegramResolution] = useState<number>(1080);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const previewSectionRef = useRef<HTMLDivElement>(null);
@@ -251,11 +256,15 @@ export default function App() {
     try {
       const exportCanvas = document.createElement('canvas');
       await renderPoster(exportCanvas, project.config, res);
-      const link = document.createElement('a');
-      link.download = `CSB-${project.name.replace(/\s+/g, '_')}-${res}px.${format}`;
-      link.href = exportCanvas.toDataURL(`image/${format}`, 0.95);
-      link.click();
-      showToast(`✓ '${project.name}' ডাউনলোড শুরু হয়েছে!`);
+      const fileName = `CSB-${project.name.replace(/\s+/g, '_')}-${res}px.${format}`;
+      
+      const result = await downloadCanvasImage(exportCanvas, fileName, format);
+      if (result.previewFallbackUrl) {
+        setTelegramFileName(fileName);
+        setTelegramResolution(res);
+        setTelegramPreviewUrl(result.previewFallbackUrl);
+      }
+      showToast(result.message || `✓ '${project.name}' ডাউনলোড সফল হয়েছে!`);
     } catch (err) {
       console.error('Failed to download project:', err);
       showToast('ডাউনলোড করতে সমস্যা হয়েছে');
@@ -314,25 +323,39 @@ export default function App() {
     showToast('মূল রেফারেন্স পোস্টার স্যাম্পল লোড করা হয়েছে');
   };
 
-  // High-Resolution Export to PNG or JPEG
+  // High-Resolution Export to PNG or JPEG with Telegram & Mobile compatibility
   const handleExport = async (format: 'png' | 'jpeg', targetRes: number = 1080) => {
     setIsExporting(true);
     try {
       const exportCanvas = document.createElement('canvas');
       await renderPoster(exportCanvas, config, targetRes);
 
-      const mimeType = format === 'jpeg' ? 'image/jpeg' : 'image/png';
-      const dataUrl = exportCanvas.toDataURL(mimeType, 0.95);
+      const fileName = `Cyber-Sentinel-Bangladesh-${targetRes}x${targetRes}.${format}`;
+      const result = await downloadCanvasImage(exportCanvas, fileName, format);
 
-      const link = document.createElement('a');
-      link.download = `Cyber-Sentinel-Bangladesh-${targetRes}x${targetRes}.${format}`;
-      link.href = dataUrl;
-      link.click();
+      if (result.previewFallbackUrl) {
+        setTelegramFileName(fileName);
+        setTelegramResolution(targetRes);
+        setTelegramPreviewUrl(result.previewFallbackUrl);
+      }
 
-      showToast(`পোস্টার সফলভাবে ডাউনলোড হয়েছে (${targetRes}x${targetRes}px)`);
+      showToast(result.message || `পোস্টার সফলভাবে ডাউনলোড হয়েছে (${targetRes}x${targetRes}px)`);
     } catch (err) {
       console.error('Export failed:', err);
-      showToast('ডাউনলোডে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+      // Fallback: render current canvas to preview modal
+      if (canvasRef.current) {
+        try {
+          const dataUrl = canvasRef.current.toDataURL(format === 'jpeg' ? 'image/jpeg' : 'image/png', 0.95);
+          setTelegramFileName(`CSB-${targetRes}px.${format}`);
+          setTelegramResolution(targetRes);
+          setTelegramPreviewUrl(dataUrl);
+          showToast('ছবিটি সংরক্ষণ করতে নিচের ছবিতে ট্যাপ করে ধরে রাখুন');
+        } catch {
+          showToast('ডাউনলোডে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+        }
+      } else {
+        showToast('ডাউনলোডে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+      }
     } finally {
       setIsExporting(false);
     }
@@ -605,6 +628,15 @@ export default function App() {
         onDownloadProject={handleDownloadSavedProject}
         onDeleteProject={handleDeleteProject}
         onOpenSaveModal={handleOpenSaveModal}
+      />
+
+      {/* Telegram & Mobile Download / Save Modal */}
+      <TelegramDownloadModal
+        isOpen={Boolean(telegramPreviewUrl)}
+        onClose={() => setTelegramPreviewUrl(null)}
+        imageUrl={telegramPreviewUrl}
+        fileName={telegramFileName}
+        resolution={telegramResolution}
       />
     </div>
   );
