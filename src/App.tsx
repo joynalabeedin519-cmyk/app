@@ -10,9 +10,13 @@ import { ImageUploadPanel } from './components/ImageUploadPanel';
 import { WatermarkControlPanel } from './components/WatermarkControlPanel';
 import { SavePosterModal } from './components/SavePosterModal';
 import { SavedPostersListModal } from './components/SavedPostersListModal';
-import { TelegramDownloadModal } from './components/TelegramDownloadModal';
+import { PosterDownloadModal } from './components/PosterDownloadModal';
 import { processLogoBackground } from './utils/imageProcessing';
-import { downloadCanvasImage } from './utils/telegramDownload';
+import {
+  getCanvasBlobAndDataUrl,
+  triggerDirectDownload,
+  copyCanvasImageToClipboard,
+} from './utils/downloadAndCopy';
 import {
   Type,
   Image as ImageIcon,
@@ -122,9 +126,10 @@ export default function App() {
 
   const [isSaveModalOpen, setIsSaveModalOpen] = useState<boolean>(false);
   const [isListModalOpen, setIsListModalOpen] = useState<boolean>(false);
-  const [telegramPreviewUrl, setTelegramPreviewUrl] = useState<string | null>(null);
-  const [telegramFileName, setTelegramFileName] = useState<string>('CSB-Notice.png');
-  const [telegramResolution, setTelegramResolution] = useState<number>(1080);
+  const [downloadModalUrl, setDownloadModalUrl] = useState<string | null>(null);
+  const [downloadModalBlob, setDownloadModalBlob] = useState<Blob | null>(null);
+  const [downloadModalFileName, setDownloadModalFileName] = useState<string>('CSB-Notice.png');
+  const [downloadModalResolution, setDownloadModalResolution] = useState<number>(1080);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const previewSectionRef = useRef<HTMLDivElement>(null);
@@ -257,14 +262,17 @@ export default function App() {
       const exportCanvas = document.createElement('canvas');
       await renderPoster(exportCanvas, project.config, res);
       const fileName = `CSB-${project.name.replace(/\s+/g, '_')}-${res}px.${format}`;
-      
-      const result = await downloadCanvasImage(exportCanvas, fileName, format);
-      if (result.previewFallbackUrl) {
-        setTelegramFileName(fileName);
-        setTelegramResolution(res);
-        setTelegramPreviewUrl(result.previewFallbackUrl);
-      }
-      showToast(result.message || `✓ '${project.name}' ডাউনলোড সফল হয়েছে!`);
+      const { blob, dataUrl } = await getCanvasBlobAndDataUrl(exportCanvas, format, 0.98);
+
+      triggerDirectDownload(dataUrl, fileName);
+
+      setDownloadModalUrl(dataUrl);
+      setDownloadModalBlob(blob);
+      setDownloadModalFileName(fileName);
+      setDownloadModalResolution(res);
+
+      setIsListModalOpen(false);
+      showToast(`✓ '${project.name}' প্রস্তুত! সেভ বা কপি করুন`);
     } catch (err) {
       console.error('Failed to download project:', err);
       showToast('ডাউনলোড করতে সমস্যা হয়েছে');
@@ -323,7 +331,7 @@ export default function App() {
     showToast('মূল রেফারেন্স পোস্টার স্যাম্পল লোড করা হয়েছে');
   };
 
-  // High-Resolution Export to PNG or JPEG with Telegram & Mobile compatibility
+  // Fresh Universal Export to PNG or JPEG (Mobile, Telegram, Desktop)
   const handleExport = async (format: 'png' | 'jpeg', targetRes: number = 1080) => {
     setIsExporting(true);
     try {
@@ -331,25 +339,28 @@ export default function App() {
       await renderPoster(exportCanvas, config, targetRes);
 
       const fileName = `Cyber-Sentinel-Bangladesh-${targetRes}x${targetRes}.${format}`;
-      const result = await downloadCanvasImage(exportCanvas, fileName, format);
+      const { blob, dataUrl } = await getCanvasBlobAndDataUrl(exportCanvas, format, 0.98);
 
-      if (result.previewFallbackUrl) {
-        setTelegramFileName(fileName);
-        setTelegramResolution(targetRes);
-        setTelegramPreviewUrl(result.previewFallbackUrl);
-      }
+      // 1. Trigger direct browser download
+      triggerDirectDownload(dataUrl, fileName);
 
-      showToast(result.message || `পোস্টার সফলভাবে ডাউনলোড হয়েছে (${targetRes}x${targetRes}px)`);
+      // 2. Open dedicated modal with full-res poster so mobile/telegram users can Tap & Hold to save or share
+      setDownloadModalUrl(dataUrl);
+      setDownloadModalBlob(blob);
+      setDownloadModalFileName(fileName);
+      setDownloadModalResolution(targetRes);
+
+      showToast(`✓ পোস্টার ডাউনলোড প্রস্তুত (${targetRes}×${targetRes}px)`);
     } catch (err) {
       console.error('Export failed:', err);
-      // Fallback: render current canvas to preview modal
       if (canvasRef.current) {
         try {
-          const dataUrl = canvasRef.current.toDataURL(format === 'jpeg' ? 'image/jpeg' : 'image/png', 0.95);
-          setTelegramFileName(`CSB-${targetRes}px.${format}`);
-          setTelegramResolution(targetRes);
-          setTelegramPreviewUrl(dataUrl);
-          showToast('ছবিটি সংরক্ষণ করতে নিচের ছবিতে ট্যাপ করে ধরে রাখুন');
+          const { blob, dataUrl } = await getCanvasBlobAndDataUrl(canvasRef.current, format, 0.98);
+          setDownloadModalUrl(dataUrl);
+          setDownloadModalBlob(blob);
+          setDownloadModalFileName(`CSB-Poster-${targetRes}px.${format}`);
+          setDownloadModalResolution(targetRes);
+          showToast('পোস্টার তৈরি হয়েছে! উইন্ডো থেকে সেভ বা কপি করুন।');
         } catch {
           showToast('ডাউনলোডে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
         }
@@ -361,31 +372,34 @@ export default function App() {
     }
   };
 
-  // Copy to Clipboard as Image
+  // Fresh Universal Copy Image to Clipboard
   const handleCopyClipboard = async () => {
     if (!canvasRef.current) return;
+    setIsExporting(true);
     try {
       const exportCanvas = document.createElement('canvas');
       await renderPoster(exportCanvas, config, 1080);
 
-      exportCanvas.toBlob(async (blob) => {
-        if (!blob) return;
-        try {
-          await navigator.clipboard.write([
-            new ClipboardItem({
-              'image/png': blob,
-            }),
-          ]);
-          setCopied(true);
-          showToast('পোস্টার ক্লিপবোর্ডে কপি হয়েছে!');
-          setTimeout(() => setCopied(false), 2500);
-        } catch (e) {
-          console.warn('Clipboard write failed:', e);
-          showToast('ক্লিপবোর্ড অনুমতি দেয়নি। ডাউনলোড বাটন ব্যবহার করুন।');
-        }
-      }, 'image/png');
+      const { blob, dataUrl } = await getCanvasBlobAndDataUrl(exportCanvas, 'png', 0.98);
+      const res = await copyCanvasImageToClipboard(exportCanvas);
+
+      if (res.success) {
+        setCopied(true);
+        showToast(res.message);
+        setTimeout(() => setCopied(false), 2500);
+      } else {
+        // Open the modal so user can tap & hold or use button
+        setDownloadModalUrl(dataUrl);
+        setDownloadModalBlob(blob);
+        setDownloadModalFileName('Cyber-Sentinel-Poster.png');
+        setDownloadModalResolution(1080);
+        showToast('কপি করতে নিচের ছবির উপর চাপ দিয়ে ধরে "Copy Image" দিন।');
+      }
     } catch (err) {
       console.error('Clipboard error:', err);
+      showToast('কপি করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -630,13 +644,18 @@ export default function App() {
         onOpenSaveModal={handleOpenSaveModal}
       />
 
-      {/* Telegram & Mobile Download / Save Modal */}
-      <TelegramDownloadModal
-        isOpen={Boolean(telegramPreviewUrl)}
-        onClose={() => setTelegramPreviewUrl(null)}
-        imageUrl={telegramPreviewUrl}
-        fileName={telegramFileName}
-        resolution={telegramResolution}
+      {/* Universal Poster Download & Copy Modal */}
+      <PosterDownloadModal
+        isOpen={Boolean(downloadModalUrl)}
+        onClose={() => {
+          setDownloadModalUrl(null);
+          setDownloadModalBlob(null);
+        }}
+        imageUrl={downloadModalUrl}
+        imageBlob={downloadModalBlob}
+        fileName={downloadModalFileName}
+        resolution={downloadModalResolution}
+        onCopyClipboard={handleCopyClipboard}
       />
     </div>
   );

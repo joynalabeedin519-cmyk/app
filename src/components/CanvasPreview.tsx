@@ -248,25 +248,47 @@ export const CanvasPreview: React.FC<CanvasPreviewProps> = ({
           </div>
         </div>
 
-        {/* Primary Download Row: Soft, High-Quality Buttons */}
-        <div className="pt-2 border-t border-slate-800/60 flex items-center gap-2.5">
+        {/* Primary Download & Copy Row */}
+        <div className="pt-2 border-t border-slate-800/60 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+          {/* Main Download Button */}
           <button
+            type="button"
             onClick={() => onExport('png', 1080)}
             disabled={isExporting}
             className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-xs sm:text-sm font-bold rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white shadow-md shadow-blue-900/30 transition-all cursor-pointer disabled:opacity-50 active:scale-98"
           >
             <Download className="w-4 h-4" />
-            <span>HD ডাউনলোড (1080px)</span>
+            <span>{isExporting ? 'তৈরি হচ্ছে...' : '📥 ডাউনলোড (1080px)'}</span>
           </button>
 
+          {/* Dedicated Prominent Copy Image Button */}
+          {onCopyClipboard && (
+            <button
+              type="button"
+              onClick={onCopyClipboard}
+              disabled={isExporting}
+              title="পোস্টার ছবি সরাসরি ক্লিপবোর্ডে কপি করুন"
+              className={`flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-xs sm:text-sm font-bold rounded-xl transition-all cursor-pointer disabled:opacity-50 active:scale-98 shadow-md ${
+                copied
+                  ? 'bg-emerald-600 text-white shadow-emerald-900/40'
+                  : 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-emerald-950/40'
+              }`}
+            >
+              {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              <span>{copied ? '✓ কপি হয়েছে!' : '📋 ছবি কপি করুন'}</span>
+            </button>
+          )}
+
+          {/* 2K Ultra Button */}
           <button
+            type="button"
             onClick={() => onExport('png', 2048)}
             disabled={isExporting}
             title="Download in Ultra 2K Quality (2048×2048px)"
-            className="flex-1 flex items-center justify-center gap-2 py-2.5 px-4 text-xs sm:text-sm font-bold rounded-xl bg-indigo-950/70 hover:bg-indigo-900/70 text-indigo-200 border border-indigo-700/50 hover:border-indigo-500 transition-all cursor-pointer disabled:opacity-50 active:scale-98 shadow-sm"
+            className="flex items-center justify-center gap-1.5 py-2.5 px-3 text-xs font-bold rounded-xl bg-indigo-950/70 hover:bg-indigo-900/70 text-indigo-200 border border-indigo-700/50 hover:border-indigo-500 transition-all cursor-pointer disabled:opacity-50 active:scale-98"
           >
             <Sparkles className="w-4 h-4 text-cyan-400" />
-            <span>2K আল্ট্রা বাটন (2048px)</span>
+            <span>2K আল্ট্রা</span>
           </button>
         </div>
       </div>
